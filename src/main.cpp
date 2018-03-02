@@ -35,7 +35,7 @@ int freq = 20000; // max frequency is 80,000,000 / 2^resolution
 int mot_channel = 0;
 int resolution = 8;
 double cmd_vel=0, velocity=0, pwm=0;
-double Ki=0.5, Kp=4, Kd=0;
+double Ki=9, Kp=15, Kd=0;
 PID PID_ex(&velocity, &pwm, &cmd_vel, Kp, Ki, Kd, DIRECT);
 // PID function declarations
 void setup_PID();
@@ -53,6 +53,32 @@ volatile int32_t enc_count=0;
 // Encoder ISR Declarations
 void A_int();
 void B_int();
+
+// UDP Echo Client variables
+const int udpEchoPort = 3333;
+WiFiUDP udp_echo;
+// UDP Declarations
+void do_UDP_echo();
+
+// UDP Setpoint Client variables
+const int udpSetPointPort = 3334;
+WiFiUDP udp_setpoint;
+void do_UDP_setpoint();
+
+// UDP Kp Client variables
+const int udpKpPort = 3335;
+WiFiUDP udp_kp;
+void do_UDP_kp();
+
+// UDP Kp Client variables
+const int udpKiPort = 3336;
+WiFiUDP udp_ki;
+void do_UDP_ki();
+
+// UDP Kp Client variables
+const int udpKdPort = 3337;
+WiFiUDP udp_kd;
+void do_UDP_kd();
 
 void setup() {
   // Serial Debug output
@@ -76,6 +102,22 @@ void setup() {
 
   // Setup PID
   setup_PID();
+
+  // UDP echo setup
+  udp_echo.begin(udpEchoPort);
+  udp_echo.flush();
+
+  // UDP setpoint
+  udp_setpoint.begin(udpSetPointPort);
+  udp_setpoint.flush();
+
+  // UDP Kp,Ki,Kd
+  udp_kp.begin(udpKpPort);
+  udp_kp.flush();
+  udp_ki.begin(udpKiPort);
+  udp_ki.flush();
+  udp_kd.begin(udpKdPort);
+  udp_kd.flush();
 }
 
 // WiFi and high level async task loop
@@ -87,6 +129,16 @@ void WiFi_loop(void * parameter) {
     // Handles OTA updates
     ArduinoOTA.handle();
 
+    // UDP echo stuff
+    do_UDP_echo();
+
+    // UDP setpoint
+    do_UDP_setpoint();
+
+    // UDP Kp,Ki,Kd
+    do_UDP_kp();
+    do_UDP_ki();
+    do_UDP_kd();
     //Serial.print("WiFi_loop: "); Serial.println(xPortGetCoreID());
     yield(); // yield to let the WiFi drivers do their thing
     vTaskDelay(500/portTICK_PERIOD_MS);
@@ -102,12 +154,12 @@ void WiFi_loop(void * parameter) {
 void loop() {
   static uint32_t start;
   start = millis();
-  Serial.print("main_loop: ");
-  Serial.println(xPortGetCoreID());
+  //Serial.print("main_loop: ");
+  //Serial.println(xPortGetCoreID());
   //vTaskDelay(500/portTICK_PERIOD_MS);
   do_PID();
-  Serial.print("Vel: "); Serial.println(velocity);
-  Serial.print("Enc: "); Serial.println(enc_count);
+  //Serial.print("Vel: "); Serial.println(velocity);
+  //Serial.print("Enc: "); Serial.println(enc_count);
   while (millis()-start < 100){
     delay(1);
   }
@@ -181,6 +233,128 @@ void start_OTA() {
 
 }
 
+void do_UDP_echo(){
+  static char buf[1024] = {'\0'};
+  static int read_status = 0;
+  int packet_size = udp_echo.parsePacket();
+  // while stuff is in the receive buffer
+  if (packet_size >= 1024){
+    read_status = udp_echo.read(buf, 1024);
+    Serial.println("Too big!");
+    Serial.print(buf);
+    read_status = udp_echo.read(buf, 1024);
+    Serial.println(buf);
+  } else if (packet_size) {
+    read_status = udp_echo.read(buf, 1024);
+    buf[packet_size] = '\0';
+    Serial.print("Got: \""); Serial.print(buf); Serial.println("\"");
+    // Echo back as ack
+    udp_echo.beginPacket(udp_echo.remoteIP(), udp_echo.remotePort());
+    udp_echo.printf(buf);
+    udp_echo.endPacket();
+  }
+  udp_echo.flush();
+}
+
+void do_UDP_setpoint(){
+  static char buf[1024] = {'\0'};
+  static int read_status = 0;
+  int packet_size = udp_setpoint.parsePacket();
+  // while stuff is in the receive buffer
+  if (packet_size >= 1024){
+    read_status = udp_setpoint.read(buf, 1024);
+    Serial.println("Too big!");
+    Serial.print(buf);
+    read_status = udp_setpoint.read(buf, 1024);
+    Serial.println(buf);
+  } else if (packet_size) {
+    read_status = udp_setpoint.read(buf, 1024);
+    buf[packet_size] = '\0';
+    Serial.print("Got: \""); Serial.print(buf); Serial.println("\"");
+    // Echo back as ack
+    udp_setpoint.beginPacket(udp_setpoint.remoteIP(), udp_setpoint.remotePort());
+    udp_setpoint.printf(buf);
+    udp_setpoint.endPacket();
+    cmd_vel = atof(buf);
+  }
+  udp_setpoint.flush();
+}
+
+void do_UDP_kp(){
+  static char buf[1024] = {'\0'};
+  static int read_status = 0;
+  int packet_size = udp_kp.parsePacket();
+  // while stuff is in the receive buffer
+  if (packet_size >= 1024){
+    read_status = udp_kp.read(buf, 1024);
+    Serial.println("Too big!");
+    Serial.print(buf);
+    read_status = udp_kp.read(buf, 1024);
+    Serial.println(buf);
+  } else if (packet_size) {
+    read_status = udp_kp.read(buf, 1024);
+    buf[packet_size] = '\0';
+    Serial.print("Got: \""); Serial.print(buf); Serial.println("\"");
+    // Echo back as ack
+    udp_kp.beginPacket(udp_kp.remoteIP(), udp_kp.remotePort());
+    udp_kp.printf(buf);
+    udp_kp.endPacket();
+    Kp = atof(buf);
+    PID_ex.SetTunings(Kp,Ki,Kd);
+  }
+  udp_kp.flush();
+}
+
+void do_UDP_ki(){
+  static char buf[1024] = {'\0'};
+  static int read_status = 0;
+  int packet_size = udp_ki.parsePacket();
+  // while stuff is in the receive buffer
+  if (packet_size >= 1024){
+    read_status = udp_ki.read(buf, 1024);
+    Serial.println("Too big!");
+    Serial.print(buf);
+    read_status = udp_ki.read(buf, 1024);
+    Serial.println(buf);
+  } else if (packet_size) {
+    read_status = udp_ki.read(buf, 1024);
+    buf[packet_size] = '\0';
+    Serial.print("Got: \""); Serial.print(buf); Serial.println("\"");
+    // Echo back as ack
+    udp_ki.beginPacket(udp_ki.remoteIP(), udp_ki.remotePort());
+    udp_ki.printf(buf);
+    udp_ki.endPacket();
+    Ki = atof(buf);
+    PID_ex.SetTunings(Kp,Ki,Kd);
+  }
+  udp_ki.flush();
+}
+
+void do_UDP_kd(){
+  static char buf[1024] = {'\0'};
+  static int read_status = 0;
+  int packet_size = udp_kd.parsePacket();
+  // while stuff is in the receive buffer
+  if (packet_size >= 1024){
+    read_status = udp_kd.read(buf, 1024);
+    Serial.println("Too big!");
+    Serial.print(buf);
+    read_status = udp_kd.read(buf, 1024);
+    Serial.println(buf);
+  } else if (packet_size) {
+    read_status = udp_kd.read(buf, 1024);
+    buf[packet_size] = '\0';
+    Serial.print("Got: \""); Serial.print(buf); Serial.println("\"");
+    // Echo back as ack
+    udp_kd.beginPacket(udp_kd.remoteIP(), udp_kd.remotePort());
+    udp_kd.printf(buf);
+    udp_kd.endPacket();
+    Kd = atof(buf);
+    PID_ex.SetTunings(Kp,Ki,Kd);
+  }
+  udp_ki.flush();
+}
+
 void setup_PID() {
   // Interrupt pins
   pinMode(A_PIN, INPUT);
@@ -199,30 +373,7 @@ void setup_PID() {
 
   PID_ex.SetMode(AUTOMATIC);
   PID_ex.SetOutputLimits(-255, 255);
-  cmd_vel = 3.14;
-}
-
-// Update motor velocity
-void update_vel(){
-  static uint32_t prev_time = millis()-1;
-  static uint32_t this_time;
-
-  static int32_t prev_count = 0;
-  static int32_t this_count;
-
-  this_time = millis();
-
-  portENTER_CRITICAL(&enc_mux);
-  this_count = enc_count;
-  portEXIT_CRITICAL(&enc_mux);
-
-  // rad/s = events/duration / EVENTS_PER_GEARBOX_REV * 2*pi
-  velocity = (1000 * (double) (this_count-prev_count)) / (double) (this_time-prev_time) / EVENTS_PER_GEARBOX_REV * 2 * 3.14;
-
-  // update prev_time to this_time
-  prev_time = this_time;
-  // Could optionally clear enc_count, but this way allows positioning wrt start
-  prev_count = this_count;
+  cmd_vel = 0;
 }
 
 void do_PID(){
@@ -244,10 +395,35 @@ void do_PID(){
 
   }
   // Write PWM
-  Serial.println(pwm);
-  Serial.println((uint8_t) round(abs(pwm)));
   ledcWrite(mot_channel, (uint8_t) round(abs(pwm)));
 
+}
+
+// Update motor velocity
+void update_vel(){
+  static uint32_t prev_time = millis()-1;
+  static uint32_t this_time;
+
+  static int32_t prev_count = 0;
+  static int32_t this_count;
+
+  static double vel_avg[5] = {0};
+  static uint32_t i = 0;
+
+  this_time = millis();
+
+  portENTER_CRITICAL(&enc_mux);
+  this_count = enc_count;
+  portEXIT_CRITICAL(&enc_mux);
+
+  // rad/s = events/duration / EVENTS_PER_GEARBOX_REV * 2*pi
+  vel_avg[i] = (1000 * (double) (this_count-prev_count)) / (double) (this_time-prev_time) / EVENTS_PER_GEARBOX_REV * 2 * 3.14 / 5;
+  velocity = vel_avg[0] + vel_avg[1] + vel_avg[2] + vel_avg[3] + vel_avg[4];
+  i = (i+1)%5;
+  // update prev_time to this_time
+  prev_time = this_time;
+  // Could optionally clear enc_count, but this way allows positioning wrt start
+  prev_count = this_count;
 }
 
 // Encoder ISR's
