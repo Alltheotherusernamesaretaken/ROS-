@@ -80,14 +80,19 @@ public:
   /// \param bitmask Pointer to bitmask encoding control types (0/velocity and 1/position).
   int get_PID_control_type(uint8_t*);
 
-    /// \brief Sets the bitmask for the PID proportion types.
-    ///
-    /// \param bitmask Bitmask encoding proportion types (0/PoE and 1/PoM).
+  /// \brief Sets the bitmask for the PID proportion types.
+  ///
+  /// \param bitmask Bitmask encoding proportion types (0/PoE and 1/PoM).
   int set_PID_proportion_type(uint8_t);
   /// \brief Gets the bitmask for the PID proportion types.
   ///
   /// \param bitmask Pointer to bitmask encoding proportion types (0/PoE and 1/PoM).
   int get_PID_proportion_type(uint8_t*);
+
+  /// \brief Zeros the sensor for the PID channel.
+  ///
+  /// \param channel PID channel index to zero.
+  int zero_PID_sensor(int);
 
 private:
   int motPWMPin[8]; ///< Array of the pin numbers for each PID channel.
