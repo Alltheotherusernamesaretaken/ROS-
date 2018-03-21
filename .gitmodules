@@ -1,0 +1,3 @@
+[submodule "lib/Encoder-Buffer-Library"]
+	path = lib/Encoder-Buffer-Library
+	url = https://github.com/SuperDroidRobots/Encoder-Buffer-Library.git
