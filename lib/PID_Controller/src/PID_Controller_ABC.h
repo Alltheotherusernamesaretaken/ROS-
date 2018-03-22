@@ -17,7 +17,7 @@ public:
   ///
   /// \param controlType Bitmask for motor control type (velocity/position).
   /// \param proportionType Bitmask for motor proportion type (PoE/PoM).
-  /// \param pwmChannelOffset Sets the offset of the starting PWM channel.
+  /// \param PWMChannelOffset Sets the offset of the starting PWM channel.
   /// \param numPID Number of PID channels to create.
   /// \param PIDPins Array of PWM pins for each channel.
   ///
@@ -95,11 +95,13 @@ public:
   int zero_PID_sensor(int);
 
 private:
+
+  SemaphoreHandle_t mutex; ///< Lock for thread-safe accesses
   int motPWMPin[8]; ///< Array of the pin numbers for each PID channel.
   int motPWMChannel[8]; ///< Array of PWM channels for each PID channel.
   int motSensorChannel[8]; ///< Array of sensor channels for each PID channel.
 
-  PID motPID[8]; ///< Array of PID objects for each PID channel.
+  PID* motPID[8]; ///< Array of PID objects for each PID channel.
 
   double motSetpoint[8]; ///< Array of PID setpoints for each PID channel.
   double motSensorVal[8]; ///< Array of PID sensor values for each PID channel.
@@ -110,10 +112,15 @@ private:
   uint8_t motProportionType; ///< Bitmask encoding proportion types for each PID channel.
 
   /// \brief Queries the sensor object and gets the new sensor values.
+  ///
+  /// This will be where the inheriting PID controllers most differ.
   virtual int _update_sensor_values();
 
   /// \brief Writes the PWM values in motPWM to the PWM channels in motPWMChannel.
   int _write_PWM_values();
+
+  void lock();
+  void unlock();
 };
 
 #endif
