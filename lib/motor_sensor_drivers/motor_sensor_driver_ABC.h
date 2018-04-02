@@ -7,23 +7,23 @@ class MotorSensorDriverABC
 {
 public:
 
-  MotorSensorDriverABC(int);
+  MotorSensorDriverABC();
 
   virtual int update();
 
-  virtual int get_angular_position(int, double*);
-  virtual int get_angular_positions(int*, double**);
+  int get_angular_position(int, double*);
+  int get_angular_positions(int*, double**);
 
-  virtual int get_angular_velocity(int, double*);
-  virtual int get_angular_velocities(int*, double**);
+  int get_angular_velocity(int, double*);
+  int get_angular_velocities(int*, double**);
 
   int reset_position(int, double);
 
-  virtual int get_angular_gain(int, double*);
-  virtual int set_angular_gain(int, double);
+  int get_angular_gain(int, double*);
+  int set_angular_gain(int, double);
 
-  virtual int get_angular_bias(int, double*);
-  virtual int set_angular_bias(int, double);
+  int get_angular_bias(int, double*);
+  int set_angular_bias(int, double);
 
 
 protected:

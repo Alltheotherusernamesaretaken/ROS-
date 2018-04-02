@@ -13,20 +13,6 @@ public:
 
   int update();
 
-  int get_angular_position(int, double*);
-  int get_angular_positions(int*, double**);
-
-  int get_angular_velocity(int, double*);
-  int get_angular_velocities(int*, double**);
-
-  int reset_position(int, double);
-
-  int get_angular_gain(int, double*);
-  int set_angular_gain(int, double);
-
-  int get_angular_bias(int, double*);
-  int set_angular_bias(int, double);
-
 private:
   Encoder_Buffer* encs[8];
   int prev_encoders[8];
