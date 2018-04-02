@@ -3,6 +3,7 @@
 MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
 : MotorSensorDriverABC(sensorCount)
 {
+  numSensors = (sensorCount) > 8 ? 8 : numSensors;
   for(int i=0; i < numSensors; i++)
   {
     Encoder_Buffer enc(sensorPins[i]);
