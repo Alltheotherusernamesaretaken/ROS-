@@ -2,7 +2,6 @@
 #define MOTOR_ADS1015_DRIVER_ABC_H_
 
 #include <Arduino.h>
-#include <Wire.h>
 #include "../Adafruit_ADS1X15/Adafruit_ADS1015.h"
 #include "motor_sensor_driver_ABC.h"
 
