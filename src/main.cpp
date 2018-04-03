@@ -74,6 +74,9 @@ void loop() {
     Serial.print("Encoder get_angular_positon Error: ");
     Serial.println(SPI_enc_interface.get_angular_position(0,&enc));
     Serial.print("Encoder: "); Serial.println(enc);
+    Serial.print("Encoder get_angular_velocity Error: ");
+    Serial.println(SPI_enc_interface.get_angular_velocity(0,&enc));
+    Serial.print("Encoder: "); Serial.println(enc);
   #endif
   #ifdef TEST_ADC
     Serial.print("ADC update Error: ");
@@ -82,6 +85,9 @@ void loop() {
     double adc;
     Serial.print("ADC get_angular_position Error: ");
     Serial.println(adc_interface.get_angular_position(0,&adc));
+    Serial.print("ADC: "); Serial.println(adc);
+    Serial.print("ADC get_angular_velocity Error: ");
+    Serial.println(adc_interface.get_angular_velocity(0,&adc));
     Serial.print("ADC: "); Serial.println(adc);
   #endif
   vTaskDelay(100/portTICK_PERIOD_MS);
