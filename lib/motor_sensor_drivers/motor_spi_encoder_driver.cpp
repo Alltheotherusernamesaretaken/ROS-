@@ -3,11 +3,12 @@
 MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
 : MotorSensorDriverABC()
 {
-  numSensors = (sensorCount) > 8 ? 8 : numSensors;
+  SPI.begin(14,27,13,15);
+  numSensors = (sensorCount) > 8 ? 8 : sensorCount;
   for(int i=0; i < numSensors; i++)
   {
-    Encoder_Buffer enc(sensorPins[i]);
-    encs[i] = &enc;
+    //Encoder_Buffer enc(sensorPins[i]);
+    encs[i] = new Encoder_Buffer(sensorPins[i]);
     encs[i]->initEncoder();
   }
 }
@@ -22,6 +23,7 @@ int MotorSPIEncoderDriver::update(){
     new_timestamps[i] = millis();
     new_encoders[i] = encs[i]->readEncoder();
   }
+
   // update position and velocity information
   for(int i=0; i<numSensors; i++)
   {
@@ -35,5 +37,6 @@ int MotorSPIEncoderDriver::update(){
     prev_timestamps[i] = new_timestamps[i];
     prev_encoders[i] = new_encoders[i];
   }
+
   return 0;
 }
