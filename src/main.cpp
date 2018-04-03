@@ -1,5 +1,10 @@
 #include"main.h"
 
+#include <SPI.h>
+
+#include "test_spi.h"
+//#define TASK_DEBUG
+
 void setup() {
   // Serial Debug output
   Serial.begin(115200);
@@ -20,6 +25,9 @@ void setup() {
     0 // Run on Core 0
   );
 
+  #ifdef TEST_SPI
+    SPI_enc_interface.set_angular_gain(0,1);
+  #endif
 
 }
 
@@ -31,12 +39,13 @@ void WiFi_loop(void * parameter) {
   while (1){
     // Handles OTA updates
     ArduinoOTA.handle();
+    #ifdef TASK_DEBUG
+      Serial.print("WiFi_loop: ");
+      Serial.println(xPortGetCoreID());
+    #endif
 
-    Serial.print("WiFi_loop: ");
-    Serial.println(xPortGetCoreID());
     yield(); // yield to let the WiFi drivers do their thing
     vTaskDelay(500/portTICK_PERIOD_MS);
-
   }
 }
 
@@ -46,8 +55,20 @@ void WiFi_loop(void * parameter) {
 //    sensitive tasks.
 // The Arduino loop always runs on Core 1
 void loop() {
-  Serial.print("main_loop: ");
-  Serial.println(xPortGetCoreID());
-  vTaskDelay(500/portTICK_PERIOD_MS);
+  #ifdef TASK_DEBUG
+    Serial.print("main_loop: ");
+    Serial.println(xPortGetCoreID());
+  #endif
+
+  #ifdef TEST_SPI
+    Serial.print("Encoder update Error: ");
+    Serial.println(SPI_enc_interface.update());
+
+    double enc;
+    Serial.print("Encoder get_angular_positon Error: ");
+    Serial.println(SPI_enc_interface.get_angular_position(0,&enc));
+    Serial.print("Encoder: "); Serial.println(enc);
+  #endif
+  vTaskDelay(100/portTICK_PERIOD_MS);
 
 }

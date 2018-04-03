@@ -4,9 +4,6 @@
 // custom library includes
 #include "motor_spi_encoder_driver.h"
 
-// Configs
-int numberOfEncoders = 5;
-int encoderSelectPinArray[] = {1 , 2, 3, 4, 5};
 
 #include <Arduino.h>
 // WiFi and OTA libraries
@@ -15,17 +12,13 @@ int encoderSelectPinArray[] = {1 , 2, 3, 4, 5};
 #include <WiFiUdp.h> // ESP32 WiFi UDP
 #include <ArduinoOTA.h> // Arduino OTA updates
 #include <Update.h> // Needed for OTA
-
+#include <Wire.h>
 // Identify which core has the Arduino stuff
 #if CONFIG_FREERTOS_UNICORE
 #define ARDUINO_RUNNING_CORE 0
 #else
 #define ARDUINO_RUNNING_CORE 1
 #endif
-
-// Globals
-MotorSPIEncoderDriver SPI_enc_interface(numberOfEncoders, encoderSelectPinArray);
-
 
 
 // Set ssid and password here
