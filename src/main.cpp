@@ -2,7 +2,10 @@
 
 #include <SPI.h>
 
-#include "test_spi.h"
+// testing includes
+//#include "test_adc.h"
+//#include "test_spi.h"
+
 //#define TASK_DEBUG
 
 void setup() {
@@ -27,6 +30,9 @@ void setup() {
 
   #ifdef TEST_SPI
     SPI_enc_interface.set_angular_gain(0,1);
+  #endif
+  #ifdef TEST_ADC
+    adc_interface.set_angular_gain(0,1);
   #endif
 
 }
@@ -68,6 +74,15 @@ void loop() {
     Serial.print("Encoder get_angular_positon Error: ");
     Serial.println(SPI_enc_interface.get_angular_position(0,&enc));
     Serial.print("Encoder: "); Serial.println(enc);
+  #endif
+  #ifdef TEST_ADC
+    Serial.print("ADC update Error: ");
+    Serial.println(adc_interface.update());
+
+    double adc;
+    Serial.print("ADC get_angular_position Error: ");
+    Serial.println(adc_interface.get_angular_position(0,&adc));
+    Serial.print("ADC: "); Serial.println(adc);
   #endif
   vTaskDelay(100/portTICK_PERIOD_MS);
 

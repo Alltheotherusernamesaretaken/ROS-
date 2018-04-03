@@ -1,16 +1,16 @@
 #include "motor_ADS1015_driver.h"
+#include <Wire.h>
 
 MotorADS1015Driver::MotorADS1015Driver(int address)
 : MotorSensorDriverABC(), ads(address)
 {
   numSensors = 4;
+  Wire.begin(21,22);
 }
 
 MotorADS1015Driver::MotorADS1015Driver()
-: MotorSensorDriverABC(), ads()
-{
-  numSensors = 4;
-}
+: MotorADS1015Driver(ADS1015_ADDRESS)
+{}
 
 int MotorADS1015Driver::update(){
     int new_adcs[4];
