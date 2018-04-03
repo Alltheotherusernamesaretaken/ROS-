@@ -7,35 +7,79 @@ class MotorSensorDriverABC
 {
 public:
 
-  MotorSensorDriverABC();
+  MotorSensorDriverABC(){};
 
   virtual int update();
 
-  int get_angular_position(int, double*);
-  int get_angular_positions(int*, double**);
+  int get_angular_position(int index, double* position){
+    if (index >= numSensors) return 1;
+    *position = angle_positions[index];
+    return 0;
+  }
 
-  int get_angular_velocity(int, double*);
-  int get_angular_velocities(int*, double**);
+  int get_angular_positions(int* sensorCount, double** positions){
+    *sensorCount = numSensors;
+    for (int i = 0; i<numSensors; i++)
+    {
+      (*positions)[i] = angle_positions[i];
+    }
+    return 0;
+  }
 
-  int reset_position(int, double);
+  int get_angular_velocity(int index, double* velocity){
+    if (index >= numSensors) return 1;
+    *velocity = angle_velocities[index];
+    return 0;
+  }
+  int get_angular_velocities(int* sensorCount, double** velocities){
+    *sensorCount = numSensors;
+    for (int i = 0; i<numSensors; i++)
+    {
+      (*velocities)[i] = angle_velocities[i];
+    }
+    return 0;
+  }
 
-  int get_angular_gain(int, double*);
-  int set_angular_gain(int, double);
+  int reset_position(int index, double target_value){
+    if (index >= numSensors) return 1;
+    angle_bias[index] = angle_bias[index] - angle_positions[index] + target_value;
+    angle_positions[index] = target_value;
+    return 0;
+  }
 
-  int get_angular_bias(int, double*);
-  int set_angular_bias(int, double);
+  int get_angular_gain(int index, double* gain){
+    if (index >= numSensors) return 1;
+    *gain = angle_gain[index];
+    return 0;
+  }
+  int set_angular_gain(int index, double gain){
+    if (index >= numSensors) return 1;
+    angle_gain[index] = gain;
+    return 0;
+  }
+
+  int get_angular_bias(int index, double* bias){
+    if (index >= numSensors) return 1;
+    *bias = angle_bias[index];
+    return 0;
+  }
+  int set_angular_bias(int index, double bias){
+    if (index >= numSensors) return 1;
+    angle_bias[index] = bias;
+    return 0;
+  }
 
 
 protected:
-  int numSensors;
+  int numSensors = 0;
 
-  unsigned int prev_timestamps[8];
+  unsigned int prev_timestamps[8] = {0};
 
-  double angle_positions[8];
-  double angle_velocities[8];
+  double angle_positions[8] = {0};
+  double angle_velocities[8] = {0};
 
-  double angle_bias[8];
-  double angle_gain[8];
+  double angle_bias[8] = {0};
+  double angle_gain[8] = {0};
 };
 
 #endif
