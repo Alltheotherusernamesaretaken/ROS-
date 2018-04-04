@@ -1,18 +1,17 @@
-#ifndef PID_CONTROLLER_ABC_H_
-#define PID_CONTROLLER_ABC_H_
+#ifndef PID_CONTROLLER__H_
+#define PID_CONTROLLER__H_
 #include<PID_v1.h>
 #include<Arduino.h>
 
 #include <motor_sensor_driver_ABC.h>
 
-/// \class PIDControllerABC
-/// \brief Abstract Base Class for the PID controllers.
+/// \class PIDController
+/// \brief Class for the PID controllers.
 ///
-/// This abstract base class implements the interface for the PID controllers.
+/// This class implements the interface for the PID controllers.
 /// These objects wrap and manage similar sets of PID controllers, hiding their
-/// numerous variables behind an object. Each class inheriting from this ABC
-/// implements a different sensor driver.
-class PIDControllerABC
+/// numerous variables behind an object.
+class PIDController
 {
 public:
   /// \brief Constructer method.
@@ -22,8 +21,10 @@ public:
   /// \param PWMChannelOffset Sets the offset of the starting PWM channel.
   /// \param numPID Number of PID channels to create.
   /// \param PIDPins Array of PWM pins for each channel.
+  /// \param PIDSensorChannels Array of sensor channels for each PID channel.
+  /// \param driver Pointer to MotorSensorDriverABC object to handle sensors
   ///
-  PIDControllerABC(uint8_t, uint8_t, int, int, int*);
+  PIDController(uint8_t, uint8_t, int, int, int*, int*, MotorSensorDriverABC*);
 
   /// \brief Updates velocity, PID, and writes PWM.
   ///
@@ -34,7 +35,7 @@ public:
   ///
   /// If it fails, it returns an integer error code. Successful updates return
   /// 0.
-  virtual int update();
+  int update();
 
   /// \brief Sets the PID gains for the given PID channel.
   ///
@@ -129,7 +130,7 @@ private:
   /// \brief Queries the sensor object and gets the new sensor values.
   ///
   /// This will be where the inheriting PID controllers most differ.
-  virtual int _update_sensor_values();
+  int _update_sensor_values();
 
   /// \brief Writes the PWM values in motPWM to the PWM channels in motPWMChannel.
   int _write_PWM_values();
