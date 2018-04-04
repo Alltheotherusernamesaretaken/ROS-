@@ -3,6 +3,8 @@
 #include<PID_v1.h>
 #include<Arduino.h>
 
+#include <motor_sensor_driver_ABC.h>
+
 /// \class PIDControllerABC
 /// \brief Abstract Base Class for the PID controllers.
 ///
@@ -26,7 +28,7 @@ public:
   /// \brief Updates velocity, PID, and writes PWM.
   ///
   /// This function queries the sensor source. With the new data,
-  /// the PID inputs are calculated, using the motSensorGain and motControlType.
+  /// the PID inputs are calculated, using the motControlType and the sensor_driver.
   /// After updating PID inputs, the PID values are computed and written to the
   /// PWM pins.
   ///
@@ -60,16 +62,27 @@ public:
   /// \param setpoint Pointer to which to write current setpoint.
   int get_PID_setpoint(int,double*);
 
-  /// \brief Sets the sensor gain for the given PID channel.
+  /// \brief Sets the sensor gain for the given PID channel's sensor.
   ///
   /// \param channel The index of the PID channel to which to write.
   /// \param gain New desired gain.
   int set_sensor_gain(int,double);
-  /// \brief Gets the PID setpoint for the give PID channel.
+  /// \brief Gets the sensor gain for the give PID channel's sensor.
   ///
   /// \param channel The index of the PID channel from which to read.
   /// \param gain Pointer to which to write current gain.
   int get_sensor_gain(int,double*);
+
+  /// \brief Sets the sensor bias for the given PID channel's sensor.
+  ///
+  /// \param channel The index of the PID channel to which to write.
+  /// \param gain New desired gain.
+  int set_sensor_bias(int,double);
+  /// \brief Gets the sensor bias for the give PID channel's sensor.
+  ///
+  /// \param channel The index of the PID channel from which to read.
+  /// \param gain Pointer to which to write current gain.
+  int get_sensor_bias(int,double*);
 
   /// \brief Sets the bitmask for the PID control types.
   ///
@@ -92,24 +105,26 @@ public:
   /// \brief Zeros the sensor for the PID channel.
   ///
   /// \param channel PID channel index to zero.
-  int zero_PID_sensor(int);
+  int zero_PID_sensor(int, double target=0.0);
 
 private:
 
   SemaphoreHandle_t mutex; ///< Lock for thread-safe accesses
-  int motPWMPin[8]; ///< Array of the pin numbers for each PID channel.
-  int motPWMChannel[8]; ///< Array of PWM channels for each PID channel.
-  int motSensorChannel[8]; ///< Array of sensor channels for each PID channel.
+  int numPID; ///< Number of active PID channels
+  int motPWMPin[4]; ///< Array of the pin numbers for each PID channel.
+  int motPWMChannel[4]; ///< Array of PWM channels for each PID channel.
+  int motSensorChannel[4]; ///< Array of sensor channels for each PID channel.
 
-  PID* motPID[8]; ///< Array of PID objects for each PID channel.
+  PID* motPID[4]; ///< Array of PID objects for each PID channel.
 
-  double motSetpoint[8]; ///< Array of PID setpoints for each PID channel.
-  double motSensorVal[8]; ///< Array of PID sensor values for each PID channel.
-  double motPWM[8]; ///< Array of PID PWM outputs for each PID channel.
-  double motSensorGain[8]; ///< Array of PID sensor gains for each PID channel.
+  double motSetpoint[4]; ///< Array of PID setpoints for each PID channel.
+  double motSensorVal[4]; ///< Array of PID sensor values for each PID channel.
+  double motPWM[4]; ///< Array of PID PWM outputs for each PID channel.
 
   uint8_t motControlType; ///< Bitmask encoding control types for each PID channel.
   uint8_t motProportionType; ///< Bitmask encoding proportion types for each PID channel.
+
+  MotorSensorDriverABC* sensor_driver;
 
   /// \brief Queries the sensor object and gets the new sensor values.
   ///
