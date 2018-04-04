@@ -73,13 +73,13 @@ public:
 protected:
   int numSensors = 0;
 
-  unsigned int prev_timestamps[8] = {0};
+  unsigned int prev_timestamps[4] = {0};
 
-  double angle_positions[8] = {0};
-  double angle_velocities[8] = {0};
+  double angle_positions[4] = {0};
+  double angle_velocities[4] = {0};
 
-  double angle_bias[8] = {0};
-  double angle_gain[8] = {0};
+  double angle_bias[4] = {0};
+  double angle_gain[4] = {0};
 };
 
 #endif

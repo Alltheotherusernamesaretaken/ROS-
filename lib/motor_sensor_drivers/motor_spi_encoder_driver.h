@@ -14,8 +14,8 @@ public:
   int update();
 
 private:
-  Encoder_Buffer* encs[8];
-  int prev_encoders[8];
+  Encoder_Buffer* encs[4];
+  int prev_encoders[4];
 };
 
 #endif

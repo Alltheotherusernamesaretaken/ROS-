@@ -4,7 +4,7 @@ MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
 : MotorSensorDriverABC()
 {
   SPI.begin(14,27,13,15);
-  numSensors = (sensorCount) > 8 ? 8 : sensorCount;
+  numSensors = (sensorCount) > 4 ? 4 : sensorCount;
   for(int i=0; i < numSensors; i++)
   {
     //Encoder_Buffer enc(sensorPins[i]);
@@ -15,8 +15,8 @@ MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
 
 // update encoder information
 int MotorSPIEncoderDriver::update(){
-  int new_encoders[8];
-  unsigned int new_timestamps[8];
+  int new_encoders[4];
+  unsigned int new_timestamps[4];
   // get new sensor information
   for(int i=0; i<numSensors; i++)
   {
