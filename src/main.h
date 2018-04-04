@@ -4,7 +4,7 @@
 // custom library includes
 #include "motor_spi_encoder_driver.h"
 #include "motor_ADS1015_driver.h"
-
+#include "PID_Controller.h"
 
 #include <Arduino.h>
 // WiFi and OTA libraries
