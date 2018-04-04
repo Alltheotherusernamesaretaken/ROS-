@@ -5,6 +5,8 @@
 // testing includes
 //#include "test_adc.h"
 //#include "test_spi.h"
+//#include "test_pid_spi.h"
+//#include "test_pid_adc.h"
 
 //#define TASK_DEBUG
 
@@ -31,12 +33,21 @@ void setup() {
   #ifdef TEST_SPI
     SPI.begin(14,27,13,15);
     SPI_enc_interface.set_angular_gain(0,1);
+    #ifdef TEST_PID_SPI
+      spi_pid.set_sensor_gain(0,1);
+      spi_pid.set_PID_gains(0, 1, 0, 0);
+      spi_pid.set_PID_setpoint(0, 20);
+    #endif
   #endif
   #ifdef TEST_ADC
     Wire.begin(21,22);
     adc_interface.set_angular_gain(0,1);
+    #ifdef TEST_PID_ADC
+      adc_pid.set_sensor_gain(0,1);
+      adc_pid.set_PID_gains(0, 1, 0, 0);
+      adc_pid.set_PID_setpoint(0, 20);
+    #endif
   #endif
-
 }
 
 // WiFi and high level async task loop
@@ -69,9 +80,13 @@ void loop() {
   #endif
 
   #ifdef TEST_SPI
-    Serial.print("Encoder update Error: ");
-    Serial.println(SPI_enc_interface.update());
-
+    #ifdef TEST_PID_SPI
+      Serial.print("PID Encoder update: ");
+      Serial.println(spi_pid.update());
+    #else
+      Serial.print("Encoder update Error: ");
+      Serial.println(SPI_enc_interface.update());
+    #endif
     double enc;
     Serial.print("Encoder get_angular_positon Error: ");
     Serial.println(SPI_enc_interface.get_angular_position(0,&enc));
@@ -81,9 +96,13 @@ void loop() {
     Serial.print("Encoder: "); Serial.println(enc);
   #endif
   #ifdef TEST_ADC
-    Serial.print("ADC update Error: ");
-    Serial.println(adc_interface.update());
-
+    #ifdef TEST_PID_ADC
+      Serial.print("PID ADC update: ");
+      Serial.println(adc_pid.update());
+    #else
+      Serial.print("ADC update Error: ");
+      Serial.println(adc_interface.update());
+    #endif
     double adc;
     Serial.print("ADC get_angular_position Error: ");
     Serial.println(adc_interface.get_angular_position(0,&adc));
