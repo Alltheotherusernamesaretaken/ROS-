@@ -38,12 +38,42 @@ void inline PIDControllerABC::unlock()
   xSemaphoreGive( mutex );
 }
 
-virtual int PIDControllerABC::update(){
-  lock();
-  for (i=0, i<8, i++){
+int PIDControllerABC::_update_sensor_values(){
+  sensor_driver->update();
+  // get positions
+  int *sensorCount = 0;
+  double *(positions[4]);
+  sensor_driver->get_angular_positions(sensorCount, positions);
 
+  // get velocity
+  double *(velocities[4]);
+  sensor_driver->get_angular_velocities(sensorCount, velocities);
+
+  for (int i = 0; i<numPID; i++)
+  {
+    // check i-th channel type (0-velocity, 1-position)
+    if (motControlType & 1>>i) {
+      // position controlled; get the sensor value
+      motSensorVal[i] = (*positions)[motSensorChannel[i]];
+    } else {
+      // velocity controlled; get the sensor value
+      motSensorVal[i] = (*velocities)[motSensorChannel[i]];
+    }
   }
-  unlock();
+  return 0;
+}
+
+int PIDControllerABC::update(){
+  lock();
+  _update_sensor_values();
+
+  for(int i=0; i<numPID;i++)
+  {
+    motPID[i]->Compute();
+  }
+
+  _write_PWM_values();
+  return 0;
 }
 
 int PIDControllerABC::set_PID_gains(int i, double kp, double ki, double kd){
