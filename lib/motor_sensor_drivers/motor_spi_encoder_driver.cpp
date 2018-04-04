@@ -3,7 +3,6 @@
 MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
 : MotorSensorDriverABC()
 {
-  SPI.begin(14,27,13,15);
   numSensors = (sensorCount) > 4 ? 4 : sensorCount;
   for(int i=0; i < numSensors; i++)
   {

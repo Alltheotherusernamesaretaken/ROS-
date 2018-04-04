@@ -29,9 +29,11 @@ void setup() {
   );
 
   #ifdef TEST_SPI
+    SPI.begin(14,27,13,15);
     SPI_enc_interface.set_angular_gain(0,1);
   #endif
   #ifdef TEST_ADC
+    Wire.begin(21,22);
     adc_interface.set_angular_gain(0,1);
   #endif
 

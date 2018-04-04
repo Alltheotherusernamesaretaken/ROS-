@@ -5,7 +5,6 @@ MotorADS1015Driver::MotorADS1015Driver(int address)
 : MotorSensorDriverABC(), ads(address)
 {
   numSensors = 4;
-  Wire.begin(21,22);
 }
 
 MotorADS1015Driver::MotorADS1015Driver()
