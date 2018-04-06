@@ -4,6 +4,7 @@
 #include<WiFiUdp.h>
 
 #include "UDP_interface_abc.h"
+#include "PID_Controller.h"
 
 /// \class Updates PID sensor gains.
 ///
@@ -12,7 +13,19 @@
 class UDPSensorGain : public UDPInterfaceABC
 {
 public:
-  UDPSensorGain(int, SemaphoreHandle_t*);
+  UDPSensorGain(int);
+
+  int handle();
+};
+
+/// \class Updates PID sensor biases.
+///
+/// This class updates the sensor bias used to transform the measured
+/// plant (motor) output into the same form as the setpoint.
+class UDPSensorBias : public UDPInterfaceABC
+{
+public:
+  UDPSensorBias(int);
 
   int handle();
 };
@@ -23,7 +36,7 @@ public:
 class UDPSetpoint : public UDPInterfaceABC
 {
 public:
-  UDPSetpoint(int, SemaphoreHandle_t*);
+  UDPSetpoint(int);
 
   int handle();
 };
@@ -34,7 +47,7 @@ public:
 class UDPProportionType : public UDPInterfaceABC
 {
 public:
-  UDPProportionType(int, SemaphoreHandle_t*);
+  UDPProportionType(int);
 
   int handle();
 };
@@ -45,19 +58,19 @@ public:
 class UDPTuningGain : public UDPInterfaceABC
 {
 public:
-  UDPTuningGain(int, SemaphoreHandle_t*);
+  UDPTuningGain(int);
 
   int handle();
 };
 
-/// \class Resets sensor offset.
+/// \class Rezero sensor.
 ///
 /// This class resets sensor offset for the desired PID channel. It clears the
 /// encoder counter for quadrature sensors and updates the offset for analog.
 class UDPZeroReset : public UDPInterfaceABC
 {
 public:
-  UDPZeroReset(int, SemaphoreHandle_t*);
+  UDPZeroReset(int);
 
   int handle();
 };
@@ -68,7 +81,7 @@ public:
 class UDPReboot : public UDPInterfaceABC
 {
 public:
-  UDPReboot(int, SemaphoreHandle_t*);
+  UDPReboot(int);
 
   int handle();
 };
@@ -79,7 +92,7 @@ public:
 class UDPControlType : public UDPInterfaceABC
 {
 public:
-  UDPControlType(int, SemaphoreHandle_t*);
+  UDPControlType(int);
 
   int handle();
 };

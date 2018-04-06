@@ -18,8 +18,7 @@ public:
   /// \brief Constructor method.
   ///
   /// \param port The port number to listen too.
-  /// \param lock A pointer to the SemaphoreHandle_t to use as a lock.
-  UDPInterfaceABC(int, SemaphoreHandle_t*);
+  UDPInterfaceABC(int);
 
   /// \brief Handles incoming/outcoming messages
   virtual int handle();
@@ -28,7 +27,6 @@ private:
   int port; ///< Stores the port number.
   WiFiUDP server; ///< The actual UDP server.
   char buffer[128]; ///< A character buffer for reading packets.
-  SemaphoreHandle_t* lock; ///< A pointer to the semaphore to use for data transfer.
 };
 
 #endif
