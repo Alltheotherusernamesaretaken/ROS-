@@ -106,7 +106,21 @@ public:
   /// \brief Zeros the sensor for the PID channel.
   ///
   /// \param channel PID channel index to zero.
+  /// \param target Target value to set current position too
   int zero_PID_sensor(int, double target=0.0);
+
+  /// \brief Gets the current PWM command.
+  ///
+  /// \param channel PID channel index.
+  /// \param pwmVal Pointer to put PWM value in.
+  int get_PID_output(int, double*);
+
+  /// \brief Sets PID output limits
+  ///
+  /// \param channel PID channel index.
+  /// \param lower PID lower output bound.
+  /// \param upper PID upper output bound.
+  int set_PID_limits(int, double, double);
 
 private:
 
