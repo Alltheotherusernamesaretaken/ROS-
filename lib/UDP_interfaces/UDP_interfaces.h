@@ -4,7 +4,6 @@
 #include<WiFiUdp.h>
 
 #include "UDP_interface_abc.h"
-#include "PID_Controller.h"
 
 /// \class Updates PID sensor gains.
 ///
@@ -13,7 +12,7 @@
 class UDPSensorGain : public UDPInterfaceABC
 {
 public:
-  UDPSensorGain(int);
+  UDPSensorGain(int, int, PIDController**);
 
   int handle();
 };
@@ -25,7 +24,7 @@ public:
 class UDPSensorBias : public UDPInterfaceABC
 {
 public:
-  UDPSensorBias(int);
+  UDPSensorBias(int, int, PIDController**);
 
   int handle();
 };
@@ -36,7 +35,7 @@ public:
 class UDPSetpoint : public UDPInterfaceABC
 {
 public:
-  UDPSetpoint(int);
+  UDPSetpoint(int, int, PIDController**);
 
   int handle();
 };
@@ -47,7 +46,7 @@ public:
 class UDPProportionType : public UDPInterfaceABC
 {
 public:
-  UDPProportionType(int);
+  UDPProportionType(int, int, PIDController**);
 
   int handle();
 };
@@ -58,7 +57,7 @@ public:
 class UDPTuningGain : public UDPInterfaceABC
 {
 public:
-  UDPTuningGain(int);
+  UDPTuningGain(int, int, PIDController**);
 
   int handle();
 };
@@ -70,7 +69,7 @@ public:
 class UDPZeroReset : public UDPInterfaceABC
 {
 public:
-  UDPZeroReset(int);
+  UDPZeroReset(int, int, PIDController**);
 
   int handle();
 };
@@ -81,7 +80,7 @@ public:
 class UDPReboot : public UDPInterfaceABC
 {
 public:
-  UDPReboot(int);
+  UDPReboot(int, int, PIDController**);
 
   int handle();
 };
@@ -92,7 +91,7 @@ public:
 class UDPControlType : public UDPInterfaceABC
 {
 public:
-  UDPControlType(int);
+  UDPControlType(int, int, PIDController**);
 
   int handle();
 };

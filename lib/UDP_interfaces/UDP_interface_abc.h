@@ -3,22 +3,36 @@
 #include<Arduino.h>
 #include<WiFiUdp.h>
 
+#include "PID_Controller.h"
+
 /// \class This abstract base class implements the UDP interface.
 ///
 /// This class implements the rudimentary components needed across the many
-/// UDP servers. Since the ESP32 is dual-core, the WiFi process (UDP included)
-/// are run on one core while hardware interaction (PID, I2C, etc.) run in
-/// parallel on the other core. Thus, the UDP interfaces need to be thread-safe
-/// when reading/writing data. So, a SemaphoreHandle_t is expected at
-/// initialization. This is used in child classes to access data in a
-/// thread-safe manner.
+/// UDP servers. It spins up a UDP server on the given port. It also maintains
+/// an array containing pointers to PIDController objects it must interface
+/// with to function. Each PIDController manages up to 4 channels. Channels are
+/// referenced by the UDP interface via a single index formed from
+/// concatenating the PIDController indexes.
+///
+/// Examples:
+/// Index 1 corresponds to the 1st PIDController's 1st channel.
+/// Index 7 corresponds to the 2nd PIDController's 3rd channel.
 class UDPInterfaceABC
 {
 public:
   /// \brief Constructor method.
   ///
   /// \param port The port number to listen too.
-  UDPInterfaceABC(int);
+  /// \param PIDcontrollerCount The number of PID controllers present.
+  /// \param PIDcontrollers An array of the PID controllers.
+  UDPInterfaceABC(int port,int _PIDControllerCount,PIDController** _PIDControllers){
+    PIDControllerCount = (_PIDControllerCount >= 4) ? 4 : _PIDControllerCount;
+    for (int i=0;i<PIDControllerCount;i++)
+    {
+      PIDControllers[i] = _PIDControllers[i];
+    }
+    server.begin(port);
+  }
 
   /// \brief Handles incoming/outcoming messages
   virtual int handle();
@@ -26,7 +40,9 @@ public:
 private:
   int port; ///< Stores the port number.
   WiFiUDP server; ///< The actual UDP server.
-  char buffer[128]; ///< A character buffer for reading packets.
+  char buffer[128] = {'\0'}; ///< A character buffer for reading packets.
+  int PIDControllerCount;
+  PIDController* PIDControllers[4];
 };
 
 #endif
