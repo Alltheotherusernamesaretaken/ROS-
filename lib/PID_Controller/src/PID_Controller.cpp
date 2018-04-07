@@ -96,42 +96,42 @@ int PIDController::get_PID_gains(int i, double *kp, double *ki, double *kd){
   return 0;
 }
 
-int PIDController::set_PID_setpoint(int i,double setp){
+int PIDController::set_PID_setpoint(int i, double setp){
   lock();
   motSetpoint[i] = setp;
   unlock();
   return 0;
 }
 
-int PIDController::get_PID_setpoint(int i,double *setp){
+int PIDController::get_PID_setpoint(int i, double *setp){
   lock();
   *setp = motSetpoint[i];
   unlock();
   return 0;
 }
 
-int PIDController::set_sensor_gain(int i,double gain){
+int PIDController::set_sensor_gain(int i, double gain){
   lock();
   sensor_driver->set_angular_gain(motSensorChannel[i],gain);
   unlock();
   return 0;
 }
 
-int PIDController::get_sensor_gain(int i,double *gain){
+int PIDController::get_sensor_gain(int i, double *gain){
   lock();
   sensor_driver->get_angular_gain(motSensorChannel[i],gain);
   unlock();
   return 0;
 }
 
-int PIDController::set_sensor_bias(int i,double bias){
+int PIDController::set_sensor_bias(int i, double bias){
   lock();
   sensor_driver->set_angular_bias(motSensorChannel[i],bias);
   unlock();
   return 0;
 }
 
-int PIDController::get_sensor_bias(int i,double *bias){
+int PIDController::get_sensor_bias(int i, double *bias){
   lock();
   sensor_driver->get_angular_bias(motSensorChannel[i],bias);
   unlock();
@@ -157,6 +157,7 @@ int PIDController::set_PID_proportion_type(uint8_t ptype){
   lock();
   motProportionType = ptype;
   // TODO: Need to update PID
+  update();
   // TODO: Need to handle when changing PID on-line
   unlock();
   return 0;
@@ -171,7 +172,7 @@ int PIDController::get_PID_proportion_type(uint8_t *ptype){
 
 int PIDController::zero_PID_sensor(int i, double value){
   lock();
-  // TODO: zero underlying object
+  MotorSensorDriverABC->reset_position(i, value);
   unlock();
   return 0;
 }
@@ -179,7 +180,7 @@ int PIDController::zero_PID_sensor(int i, double value){
 int PIDController::_write_PWM_values(){
   lock();
   for(int i=0; i<numPID; i++){
-    // TODO: write pwm
+    motPWMChannel[numPID]->ledcWrite(0, motPWM);
   }
   unlock();
   return 0;
