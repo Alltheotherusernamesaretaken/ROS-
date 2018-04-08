@@ -13,9 +13,23 @@ public:
   int begin();
   int update();
 
-private:
+protected:
   Encoder_Buffer* encs[4];
   int prev_encoders[4];
+};
+
+class SPIRollingAverageEncoderDriver : public MotorSPIEncoderDriver
+{
+public:
+
+  SPIRollingAverageEncoderDriver(int, int*, int=5);
+
+  int update();
+
+protected:
+  int rollCount;
+  double* roll_pos[4];
+  double* roll_vel[4];
 };
 
 #endif
