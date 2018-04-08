@@ -8,6 +8,12 @@ MotorSPIEncoderDriver::MotorSPIEncoderDriver(int sensorCount, int* sensorPins)
   {
     //Encoder_Buffer enc(sensorPins[i]);
     encs[i] = new Encoder_Buffer(sensorPins[i]);
+  }
+}
+
+int MotorSPIEncoderDriver::begin(){
+  for(int i=0; i < numSensors; i++)
+  {
     encs[i]->initEncoder();
   }
 }

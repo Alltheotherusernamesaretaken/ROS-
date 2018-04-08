@@ -132,9 +132,9 @@ private:
 
   PID* motPID[4]; ///< Array of PID objects for each PID channel.
 
-  double motSetpoint[4]; ///< Array of PID setpoints for each PID channel.
-  double motSensorVal[4]; ///< Array of PID sensor values for each PID channel.
-  double motPWM[4]; ///< Array of PID PWM outputs for each PID channel.
+  double motSetpoint[4] = {0}; ///< Array of PID setpoints for each PID channel.
+  double motSensorVal[4] = {0}; ///< Array of PID sensor values for each PID channel.
+  double motPWM[4] = {511}; ///< Array of PID PWM outputs for each PID channel.
 
   uint8_t motControlType; ///< Bitmask encoding control types for each PID channel.
   uint8_t motProportionType; ///< Bitmask encoding proportion types for each PID channel.

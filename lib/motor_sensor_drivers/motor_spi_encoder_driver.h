@@ -10,7 +10,7 @@ class MotorSPIEncoderDriver :  public MotorSensorDriverABC
 public:
 
   MotorSPIEncoderDriver(int, int*);
-
+  int begin();
   int update();
 
 private:
