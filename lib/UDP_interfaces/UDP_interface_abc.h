@@ -37,7 +37,7 @@ public:
   /// \brief Handles incoming/outcoming messages
   virtual int handle();
 
-private:
+protected:
   int port; ///< Stores the port number.
   WiFiUDP server; ///< The actual UDP server.
   char buffer[128] = {'\0'}; ///< A character buffer for reading packets.
