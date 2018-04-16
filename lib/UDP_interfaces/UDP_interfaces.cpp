@@ -93,39 +93,37 @@ int UDPTuningGain::handle(){
       bool indexEndFound = false;
 
       for(int c = 0; c<packet_size; c++){
-        if(buffer[c] == ','){
+        if( (buffer[c] == ',')  ){
+          if (indexEndFound) {
+            gainCount++;
+            floatIndex = 0;
+          }
           indexEndFound = true;
           continue;
-
-          // This is for locating the kp, ki, kd values assuming they are sequential and exist. A bit iffy.
-
+        // index
+        } else if (~indexEndFound){
+          intBuf[intIndex] = buffer[c];
+        // Kp
         } else if(indexEndFound && gainCount == 0){
           floatBufKp[floatIndex] = buffer[c];
           floatIndex++;
           continue;
-
+        // Ki
         } else if(indexEndFound && gainCount == 1){
           floatBufKi[floatIndex] = buffer[c];
           floatIndex++;
           continue;
-
+        // Kd
         } else if(indexEndFound && gainCount == 2){
           floatBufKd[floatIndex] = buffer[c];
           floatIndex++;
           continue;
-
-        } if (buffer[c+1] == ',' && indexEndFound == true){
-          indexEndFound = false;
-          gainCount++;
-          floatIndex = 0;
         }
     }
-
     motorChannelIndex = atoi(intBuf);
     kp = atof(floatBufKp);
     ki = atof(floatBufKi);
     kd = atof(floatBufKd);
-
   }
 
   return PIDControllers[motorChannelIndex/4]->set_PID_gains(motorChannelIndex%4, kp, ki, kd);
