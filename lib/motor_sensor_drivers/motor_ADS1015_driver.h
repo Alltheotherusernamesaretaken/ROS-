@@ -14,9 +14,18 @@ public:
 
   int update();
 
-private:
+protected:
   Adafruit_ADS1015 ads;
   int16_t prev_adcs[4];
+};
+
+class LinearActuatorSensorDriver : public MotorADS1015Driver
+{
+public:
+  LinearActuatorSensorDriver();
+  LinearActuatorSensorDriver(int);
+
+  int update();
 };
 
 #endif

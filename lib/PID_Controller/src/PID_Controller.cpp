@@ -18,13 +18,13 @@ PIDController::PIDController(uint8_t controlType, uint8_t proportionType, int PW
     motSensorChannel[i] = _PIDSensorChannels[i];
 
     // Initialize PWM channels
-    ledcSetup(motPWMChannel[i], 20000, 8);
+    ledcSetup(motPWMChannel[i], 333, 10);
     ledcAttachPin(motPWMPin[i], motPWMChannel[i]);
 
     // Initialize PID
-    motPID[i] = new PID(&motSensorVal[0], &motPWM[0], &motSetpoint[0], 0, 0, 0, ((motProportionType & (1<<i))>>i), DIRECT);
-    motPID[i]->SetOutputLimits(-255,255);
-
+    motPID[i] = new PID(motSensorVal+i, motPWM+i, motSetpoint+i, 0, 0, 0, ~((motProportionType & (1<<i))>>i), DIRECT);
+    motPID[i]->SetOutputLimits(340,682);
+    motPID[i]->SetMode(AUTOMATIC);
     // zero the setpoint, to be safe
     motSetpoint[i] = 0;
   }
@@ -44,23 +44,23 @@ void inline PIDController::unlock()
 int PIDController::_update_sensor_values(){
   sensor_driver->update();
   // get positions
-  int *sensorCount = 0;
-  double *(positions[4]);
-  sensor_driver->get_angular_positions(sensorCount, positions);
+  int sensorCount = 0;
+  double positions[4] = {0};
+  sensor_driver->get_angular_positions(&sensorCount, positions);
 
   // get velocity
-  double *(velocities[4]);
-  sensor_driver->get_angular_velocities(sensorCount, velocities);
+  double velocities[4] = {0};
+  sensor_driver->get_angular_velocities(&sensorCount, velocities);
 
   for (int i = 0; i<numPID; i++)
   {
     // check i-th channel type (0-velocity, 1-position)
     if (motControlType & 1>>i) {
       // position controlled; get the sensor value
-      motSensorVal[i] = (*positions)[motSensorChannel[i]];
+      motSensorVal[i] = positions[motSensorChannel[i]];
     } else {
       // velocity controlled; get the sensor value
-      motSensorVal[i] = (*velocities)[motSensorChannel[i]];
+      motSensorVal[i] = velocities[motSensorChannel[i]];
     }
   }
   return 0;
@@ -70,13 +70,16 @@ int PIDController::update(){
   lock();
   _update_sensor_values();
 
+  bool running = 1;
+
   for(int i=0; i<numPID;i++)
   {
-    motPID[i]->Compute();
+    running = running * motPID[i]->Compute();
   }
 
   _write_PWM_values();
-  return 0;
+  unlock();
+  return running;
 }
 
 int PIDController::set_PID_gains(int i, double kp, double ki, double kd){
@@ -96,42 +99,42 @@ int PIDController::get_PID_gains(int i, double *kp, double *ki, double *kd){
   return 0;
 }
 
-int PIDController::set_PID_setpoint(int i,double setp){
+int PIDController::set_PID_setpoint(int i, double setp){
   lock();
   motSetpoint[i] = setp;
   unlock();
   return 0;
 }
 
-int PIDController::get_PID_setpoint(int i,double *setp){
+int PIDController::get_PID_setpoint(int i, double *setp){
   lock();
   *setp = motSetpoint[i];
   unlock();
   return 0;
 }
 
-int PIDController::set_sensor_gain(int i,double gain){
+int PIDController::set_sensor_gain(int i, double gain){
   lock();
   sensor_driver->set_angular_gain(motSensorChannel[i],gain);
   unlock();
   return 0;
 }
 
-int PIDController::get_sensor_gain(int i,double *gain){
+int PIDController::get_sensor_gain(int i, double *gain){
   lock();
   sensor_driver->get_angular_gain(motSensorChannel[i],gain);
   unlock();
   return 0;
 }
 
-int PIDController::set_sensor_bias(int i,double bias){
+int PIDController::set_sensor_bias(int i, double bias){
   lock();
   sensor_driver->set_angular_bias(motSensorChannel[i],bias);
   unlock();
   return 0;
 }
 
-int PIDController::get_sensor_bias(int i,double *bias){
+int PIDController::get_sensor_bias(int i, double *bias){
   lock();
   sensor_driver->get_angular_bias(motSensorChannel[i],bias);
   unlock();
@@ -171,16 +174,22 @@ int PIDController::get_PID_proportion_type(uint8_t *ptype){
 
 int PIDController::zero_PID_sensor(int i, double value){
   lock();
-  // TODO: zero underlying object
+  sensor_driver->reset_position(i, value);
+  unlock();
+  return 0;
+}
+
+int PIDController::get_PID_output(int i, double* output){
+  if (i >= numPID) return 1;
+  lock();
+  *output = motPWM[i];
   unlock();
   return 0;
 }
 
 int PIDController::_write_PWM_values(){
-  lock();
   for(int i=0; i<numPID; i++){
-    // TODO: write pwm
+    ledcWrite(motPWMChannel[i], motPWM[i]);
   }
-  unlock();
   return 0;
 }

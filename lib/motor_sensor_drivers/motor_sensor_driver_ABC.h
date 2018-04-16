@@ -8,7 +8,7 @@ class MotorSensorDriverABC
 public:
 
   MotorSensorDriverABC(){};
-
+  virtual int begin();
   virtual int update();
 
   int get_angular_position(int index, double* position){
@@ -17,11 +17,11 @@ public:
     return 0;
   }
 
-  int get_angular_positions(int* sensorCount, double** positions){
+  int get_angular_positions(int* sensorCount, double* positions){
     *sensorCount = numSensors;
     for (int i = 0; i<numSensors; i++)
     {
-      (*positions)[i] = angle_positions[i];
+      positions[i] = angle_positions[i];
     }
     return 0;
   }
@@ -31,11 +31,11 @@ public:
     *velocity = angle_velocities[index];
     return 0;
   }
-  int get_angular_velocities(int* sensorCount, double** velocities){
+  int get_angular_velocities(int* sensorCount, double* velocities){
     *sensorCount = numSensors;
     for (int i = 0; i<numSensors; i++)
     {
-      (*velocities)[i] = angle_velocities[i];
+      velocities[i] = angle_velocities[i];
     }
     return 0;
   }

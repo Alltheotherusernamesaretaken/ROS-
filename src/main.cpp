@@ -5,7 +5,7 @@
 // testing includes
 //#include "test_adc.h"
 //#include "test_spi.h"
-//#include "test_pid_spi.h"
+#include "test_pid_spi.h"
 //#include "test_pid_adc.h"
 
 //#define TASK_DEBUG
@@ -32,11 +32,15 @@ void setup() {
 
   #ifdef TEST_SPI
     SPI.begin(14,27,13,15);
+    SPI_enc_interface.begin();
     SPI_enc_interface.set_angular_gain(0,1);
     #ifdef TEST_PID_SPI
       spi_pid.set_sensor_gain(0,1);
-      spi_pid.set_PID_gains(0, 1, 0, 0);
-      spi_pid.set_PID_setpoint(0, 20);
+      spi_pid.set_PID_gains(0, 0, 0.1, 0);
+      spi_pid.set_PID_setpoint(0, 1000);
+      double set;
+      spi_pid.get_PID_setpoint(0,&set);
+      Serial.println(set);
     #endif
   #endif
   #ifdef TEST_ADC
@@ -44,7 +48,7 @@ void setup() {
     adc_interface.set_angular_gain(0,1);
     #ifdef TEST_PID_ADC
       adc_pid.set_sensor_gain(0,1);
-      adc_pid.set_PID_gains(0, 1, 0, 0);
+      adc_pid.set_PID_gains(0, 1, 1, 1);
       adc_pid.set_PID_setpoint(0, 20);
     #endif
   #endif
@@ -83,6 +87,11 @@ void loop() {
     #ifdef TEST_PID_SPI
       Serial.print("PID Encoder update: ");
       Serial.println(spi_pid.update());
+      double val;
+      spi_pid.get_PID_setpoint(0, &val);
+      Serial.println(val);
+      spi_pid.get_PID_output(0, &val);
+      Serial.println(val);
     #else
       Serial.print("Encoder update Error: ");
       Serial.println(SPI_enc_interface.update());

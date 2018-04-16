@@ -11,7 +11,7 @@ uint8_t SPIcontrolType = 0b00000000;
 uint8_t SPIproportionType = 0b00000000;
 int SPIPWMChannelOffset = 0;
 int SPInumPID = 1;
-int SPIPWMpins[1] = {17};
+int SPIPWMpins[1] = {2};
 int SPIPIDSensorChannels[1] = {0};
 
 PIDController spi_pid(

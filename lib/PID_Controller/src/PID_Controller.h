@@ -106,7 +106,21 @@ public:
   /// \brief Zeros the sensor for the PID channel.
   ///
   /// \param channel PID channel index to zero.
+  /// \param target Target value to set current position too
   int zero_PID_sensor(int, double target=0.0);
+
+  /// \brief Gets the current PWM command.
+  ///
+  /// \param channel PID channel index.
+  /// \param pwmVal Pointer to put PWM value in.
+  int get_PID_output(int, double*);
+
+  /// \brief Sets PID output limits
+  ///
+  /// \param channel PID channel index.
+  /// \param lower PID lower output bound.
+  /// \param upper PID upper output bound.
+  int set_PID_limits(int, double, double);
 
 private:
 
@@ -118,9 +132,9 @@ private:
 
   PID* motPID[4]; ///< Array of PID objects for each PID channel.
 
-  double motSetpoint[4]; ///< Array of PID setpoints for each PID channel.
-  double motSensorVal[4]; ///< Array of PID sensor values for each PID channel.
-  double motPWM[4]; ///< Array of PID PWM outputs for each PID channel.
+  double motSetpoint[4] = {0}; ///< Array of PID setpoints for each PID channel.
+  double motSensorVal[4] = {0}; ///< Array of PID sensor values for each PID channel.
+  double motPWM[4] = {511}; ///< Array of PID PWM outputs for each PID channel.
 
   uint8_t motControlType; ///< Bitmask encoding control types for each PID channel.
   uint8_t motProportionType; ///< Bitmask encoding proportion types for each PID channel.
