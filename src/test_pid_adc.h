@@ -1,5 +1,6 @@
 #ifndef TEST_PID_ADC
 #define TEST_PID_ADC
+#define TEST
 
 // Enable spi test
 #include "test_adc.h"

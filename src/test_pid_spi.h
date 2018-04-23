@@ -1,5 +1,6 @@
 #ifndef TEST_PID_SPI
 #define TEST_PID_SPI
+#define TEST
 
 // Enable spi test
 #include "test_spi.h"

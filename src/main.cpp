@@ -52,6 +52,12 @@ void setup() {
       adc_pid.set_PID_setpoint(0, 20);
     #endif
   #endif
+
+  // Actual Running code
+  #ifndef TEST
+    init_enc();
+    init_PID();
+  #endif
 }
 
 // WiFi and high level async task loop
