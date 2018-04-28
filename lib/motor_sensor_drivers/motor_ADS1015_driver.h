@@ -22,10 +22,15 @@ protected:
 class LinearActuatorSensorDriver : public MotorADS1015Driver
 {
 public:
-  LinearActuatorSensorDriver();
-  LinearActuatorSensorDriver(int);
+  LinearActuatorSensorDriver(double*);
+  LinearActuatorSensorDriver(int,  double*);
 
   int update();
+
+protected:
+  // Arms are ordered
+  // RAD, RAB, RDE, ROA
+  double armLengths[4];
 };
 
 #endif
