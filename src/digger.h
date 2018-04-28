@@ -5,6 +5,7 @@
 #include "PID_Controller.h"
 #include "UDP_interfaces.h"
 #include "motor_spi_encoder_driver.h"
+#include "motor_ADS1015_driver.h"
 #include <Wire.h>
 
 // Configs
@@ -71,9 +72,19 @@
   #define SPI_2_2_KI 0
   #define SPI_2_2_KD 0
 
-// ADC objects
+// ADC 1
+#define ACTUATOR_ARM_LENGTHS
+#define ADC_1_1_GAIN 1
+#define ADC_1_1_BIAS 1
+#define ADC_1_2_GAIN 1
+#define ADC_1_2_BIAS 1
+#define ADC_1_3_GAIN 1
+#define ADC_1_3_BIAS 1
+#define ADC_1_4_GAIN 1
+#define ADC_1_4_BIAS 1
 
 // ADC 1 PID
+#define ADC_1_NUM_PID 4
 #define ADC_1_CONTROL_TYPE 0b00001111
 #define ADC_1_PROPORTION_TYPE 0b00001111
 #define ADC_1_PWM_OFFSET 6
@@ -93,6 +104,7 @@
   #define ADC_1_4_KI 1
   #define ADC_1_4_KD 1
 
+
 // SPI objects
 // SPI 1 - Drive
 #ifdef SPI_1_NUM
@@ -106,32 +118,12 @@ int numberOfEncoders_2 = SPI_2_NUM;
 int encoderSelectPinArray_2[] = { SPI_2_DRIVE_PINS };
 MotorSPIEncoderDriver SPI_enc_2(numberOfEncoders_2, encoderSelectPinArray_2);
 #endif
-
-inline void init_enc() {
-  #ifdef SPI_1_NUM
-  // init SPI 1
-  // SPI.begin( SPI_PINS );
-  // SPI 1 - Drive
-  {
-    SPI_enc_1.begin();
-  }
-  #endif
-  #ifdef SPI_2_NUM
-  // init SPI 2
-  // SPI.begin( SPI_PINS );
-  // SPI 2 - Drive
-  {
-    SPI_enc_2.begin();
-    // 1
-    SPI_enc_2.set_angular_gain(0,SPI_2_1_GAIN);
-    SPI_enc_2.set_angular_bias(0,SPI_2_1_BIAS);
-    // 2
-    SPI_enc_2.set_angular_gain(1,SPI_2_2_GAIN);
-    SPI_enc_2.set_angular_bias(1,SPI_2_2_BIAS);
-  }
-  #endif
-
-}
+// ADC objects
+// ADC 1 - linear actuators
+#ifdef ACTUATOR_ARM_LENGTHS
+double actautorArmArray[] = { ACTUATOR_ARM_LENGTHS };
+LinearActuatorSensorDriver ADC_pot_1( actautorArmArray );
+#endif
 
 // PID objects
 // SPI PID 1 - Drive
@@ -167,11 +159,27 @@ PIDController spi_pid_2(
   &SPI_enc_2
 );
 // ADC PID 3 - Actuators
-
-inline void init_PID() {
+uint8_t ADCcontrolType_1 = ADC_1_CONTROL_TYPE; // All Velocity
+uint8_t ADCproportionType_1 = ADC_1_PROPORTION_TYPE; // All PoE
+int ADCPWMChannelOffset_1 = ADC_1_PWM_OFFSET; // First PID so no offset
+int ADCnumPID_1 = ADC_1_NUM_PID; // 4 PID
+int ADCPWMpins_1[ ADC_1_NUM_PID ] = { ADC_1_PWM_CHANNELS }; // The four PWM pins
+int ADCPIDSensorChannels_1[ ADC_1_NUM_PID ] = { ADC_1_SENSOR_CHANNELS };
+PIDController adc_pid_1(
+  ADCcontrolType_1,
+  ADCproportionType_1,
+  ADCPWMChannelOffset_1,
+  ADCnumPID_1,
+  ADCPWMpins_1,
+  ADCPIDSensorChannels_1,
+  &ADC_pot_1
+);
+// init sensors and PID
+inline void init() {
   #ifdef SPI_1_NUM
   // SPI PID 1
   {
+    SPI_enc_1.begin();
     // 1
     spi_pid_1.set_sensor_gain(0,SPI_1_1_GAIN);
     spi_pid_1.set_sensor_bias(0,SPI_1_1_BIAS);
@@ -197,6 +205,7 @@ inline void init_PID() {
   #ifdef SPI_2_NUM
   // SPI PID 2
   {
+    SPI_enc_2.begin();
     // 1
     spi_pid_2.set_sensor_gain(0,SPI_2_1_GAIN);
     spi_pid_2.set_sensor_bias(0,SPI_2_1_BIAS);
@@ -209,6 +218,42 @@ inline void init_PID() {
     spi_pid_2.set_PID_setpoint(1, 0);
   }
   #endif
+  #ifdef ACTUATOR_ARM_LENGTHS
+  // ADC PID 1
+  {
+    // 1
+    adc_pid_1.set_sensor_gain(0,ADC_1_1_GAIN);
+    adc_pid_1.set_sensor_bias(0,ADC_1_1_BIAS);
+    adc_pid_1.set_PID_gains(0, ADC_1_1_KP, ADC_1_1_KI, ADC_1_1_KD);
+    adc_pid_1.set_PID_setpoint(0, 0);
+    // 2
+    adc_pid_1.set_sensor_gain(1,ADC_1_2_GAIN);
+    adc_pid_1.set_sensor_bias(1,ADC_1_2_BIAS);
+    adc_pid_1.set_PID_gains(1, ADC_1_2_KP, ADC_1_2_KI, ADC_1_2_KD);
+    adc_pid_1.set_PID_setpoint(1, 0);
+    // 3
+    adc_pid_1.set_sensor_gain(2,ADC_1_3_GAIN);
+    adc_pid_1.set_sensor_bias(2,ADC_1_3_BIAS);
+    adc_pid_1.set_PID_gains(2, ADC_1_3_KP, ADC_1_3_KI, ADC_1_3_KD);
+    adc_pid_1.set_PID_setpoint(2, 0);
+    // 4
+    adc_pid_1.set_sensor_gain(3,ADC_1_4_GAIN);
+    adc_pid_1.set_sensor_bias(3,ADC_1_4_BIAS);
+    adc_pid_1.set_PID_gains(3, ADC_1_4_KP, ADC_1_4_KI, ADC_1_4_KD);
+    adc_pid_1.set_PID_setpoint(3, 0);
+  }
+  #endif
 }
-
+// update PIDs
+inline void update(){
+  #ifdef SPI_1_NUM
+  spi_pid_1.update();
+  #endif
+  #ifdef SPI_2_NUM
+  spi_pid_2.update();
+  #endif
+  #ifdef ACTUATOR_ARM_LENGTHS
+  adc_pid_1.update();
+  #endif
+}
 #endif

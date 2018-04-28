@@ -37,7 +37,7 @@ int MotorADS1015Driver::update(){
 LinearActuatorSensorDriver::LinearActuatorSensorDriver(double* _armLengths)
 : MotorADS1015Driver()
 {
-  for(int i=0; i<5; i++)
+  for(int i=0; i<4; i++)
   {
     armLengths[i] = _armLengths[i];
   }
@@ -46,7 +46,7 @@ LinearActuatorSensorDriver::LinearActuatorSensorDriver(double* _armLengths)
 LinearActuatorSensorDriver::LinearActuatorSensorDriver(int address, double* _armLengths)
 : MotorADS1015Driver(address)
 {
-  for(int i=0; i<5; i++)
+  for(int i=0; i<4; i++)
   {
     armLengths[i] = _armLengths[i];
   }

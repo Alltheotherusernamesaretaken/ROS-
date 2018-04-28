@@ -5,7 +5,7 @@
 // testing includes
 //#include "test_adc.h"
 //#include "test_spi.h"
-#include "test_pid_spi.h"
+//#include "test_pid_spi.h"
 //#include "test_pid_adc.h"
 
 //#define TASK_DEBUG
@@ -30,33 +30,9 @@ void setup() {
     0 // Run on Core 0
   );
 
-  #ifdef TEST_SPI
-    SPI.begin(14,27,13,15);
-    SPI_enc_interface.begin();
-    SPI_enc_interface.set_angular_gain(0,1);
-    #ifdef TEST_PID_SPI
-      spi_pid.set_sensor_gain(0,1);
-      spi_pid.set_PID_gains(0, 0, 0.1, 0);
-      spi_pid.set_PID_setpoint(0, 1000);
-      double set;
-      spi_pid.get_PID_setpoint(0,&set);
-      Serial.println(set);
-    #endif
-  #endif
-  #ifdef TEST_ADC
-    Wire.begin(21,22);
-    adc_interface.set_angular_gain(0,1);
-    #ifdef TEST_PID_ADC
-      adc_pid.set_sensor_gain(0,1);
-      adc_pid.set_PID_gains(0, 1, 1, 1);
-      adc_pid.set_PID_setpoint(0, 20);
-    #endif
-  #endif
-
   // Actual Running code
-  #ifndef TEST
-    init_enc();
-    init_PID();
+  #ifdef ROBOT_CONFIGS
+    init();
   #endif
 }
 
@@ -69,12 +45,18 @@ void WiFi_loop(void * parameter) {
     // Handles OTA updates
     ArduinoOTA.handle();
     #ifdef TASK_DEBUG
-      Serial.print("WiFi_loop: ");
-      Serial.println(xPortGetCoreID());
+      // Only print every 250 ms
+      static start = millis();
+      if (millis()-start) > 250)
+      {
+        Serial.print("WiFi_loop: ");
+        Serial.println(xPortGetCoreID());
+        start = millis();
+      }
     #endif
 
     yield(); // yield to let the WiFi drivers do their thing
-    vTaskDelay(500/portTICK_PERIOD_MS);
+    //vTaskDelay(500/portTICK_PERIOD_MS);
   }
 }
 
@@ -84,48 +66,16 @@ void WiFi_loop(void * parameter) {
 //    sensitive tasks.
 // The Arduino loop always runs on Core 1
 void loop() {
+  static uint32_t start;
+  start = millis();
   #ifdef TASK_DEBUG
     Serial.print("main_loop: ");
     Serial.println(xPortGetCoreID());
   #endif
 
-  #ifdef TEST_SPI
-    #ifdef TEST_PID_SPI
-      Serial.print("PID Encoder update: ");
-      Serial.println(spi_pid.update());
-      double val;
-      spi_pid.get_PID_setpoint(0, &val);
-      Serial.println(val);
-      spi_pid.get_PID_output(0, &val);
-      Serial.println(val);
-    #else
-      Serial.print("Encoder update Error: ");
-      Serial.println(SPI_enc_interface.update());
-    #endif
-    double enc;
-    Serial.print("Encoder get_angular_positon Error: ");
-    Serial.println(SPI_enc_interface.get_angular_position(0,&enc));
-    Serial.print("Encoder: "); Serial.println(enc);
-    Serial.print("Encoder get_angular_velocity Error: ");
-    Serial.println(SPI_enc_interface.get_angular_velocity(0,&enc));
-    Serial.print("Encoder: "); Serial.println(enc);
+  #ifdef ROBOT_CONFIGS
+    update();
   #endif
-  #ifdef TEST_ADC
-    #ifdef TEST_PID_ADC
-      Serial.print("PID ADC update: ");
-      Serial.println(adc_pid.update());
-    #else
-      Serial.print("ADC update Error: ");
-      Serial.println(adc_interface.update());
-    #endif
-    double adc;
-    Serial.print("ADC get_angular_position Error: ");
-    Serial.println(adc_interface.get_angular_position(0,&adc));
-    Serial.print("ADC: "); Serial.println(adc);
-    Serial.print("ADC get_angular_velocity Error: ");
-    Serial.println(adc_interface.get_angular_velocity(0,&adc));
-    Serial.print("ADC: "); Serial.println(adc);
-  #endif
-  vTaskDelay(100/portTICK_PERIOD_MS);
-
+  // Sleep for remainder to give 100 Hz
+  if ((millis()-start)<10) vTaskDelay((10-(millis()-start))/portTICK_PERIOD_MS);
 }
