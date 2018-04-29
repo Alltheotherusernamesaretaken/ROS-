@@ -68,6 +68,143 @@ int UDPSetpoint::handle(){
   }
 }
 
+UDPSensorBias::UDPSensorBias(int port, int _PIDControllerCount, PIDController** _PIDControllers)
+: UDPInterfaceABC(port, _PIDControllerCount, _PIDControllers)
+{}
+
+int UDPSensorBias::handle(){
+  int packet_size = server.parsePacket();
+  int read_status;
+  if (packet_size){
+    read_status = server.read(buffer, 128);
+    // return error code if read fails
+    if (read_status) return read_status;
+
+    buffer[packet_size] = '\0';
+
+    // echo as ACK
+    server.beginPacket(server.remoteIP(), server.remotePort());
+    server.printf(buffer);
+    server.endPacket();
+
+    server.flush();
+
+    // Parse the message now
+    int motorChannelIndex;
+    double bias;
+    {
+      int intIndex = 0;
+      char intBuf[8] = {'\0'};
+      int floatIndex = 0;
+      char floatBuf[16] = {'\0'};
+      bool indexEndFound = false;
+      bool request = false; // default to command
+      // split out integer index and float bias
+      for(int c=0; c<packet_size; c++)
+      {
+        if (buffer[c] == ',' || buffer[c] == '?'){
+          indexEndFound = true;
+          if (buffer[c] == ',') continue;
+          request = true;
+          break;
+        } else if (indexEndFound){
+          floatBuf[floatIndex] = buffer[c];
+          floatIndex++;
+          continue;
+        } else {
+          intBuf[intIndex] = buffer[c];
+          intIndex++;
+          continue;
+        }
+      }
+      motorChannelIndex = atoi(intBuf);
+      // current bias requested
+      if (request){
+        PIDControllers[motorChannelIndex/4]->get_sensor_bias(motorChannelIndex%4, &bias);
+        // create a packet containing current bias
+        server.beginPacket(server.remoteIP(), server.remotePort());
+        server.printf("%i,%f", motorChannelIndex, bias);
+        server.endPacket();
+      // new bias commanded
+      }else {
+        bias = atof(floatBuf);
+      }
+    }
+
+    // Have the index and bias, now set the PIDController channel
+    return PIDControllers[motorChannelIndex/4]->set_sensor_bias(motorChannelIndex%4, bias);
+  }
+}
+
+
+UDPSensorGain::UDPSensorGain(int port, int _PIDControllerCount, PIDController** _PIDControllers)
+: UDPInterfaceABC(port, _PIDControllerCount, _PIDControllers)
+{}
+
+int UDPSensorGain::handle(){
+  int packet_size = server.parsePacket();
+  int read_status;
+  if (packet_size){
+    read_status = server.read(buffer, 128);
+    // return error code if read fails
+    if (read_status) return read_status;
+
+    buffer[packet_size] = '\0';
+
+    // echo as ACK
+    server.beginPacket(server.remoteIP(), server.remotePort());
+    server.printf(buffer);
+    server.endPacket();
+
+    server.flush();
+
+    // Parse the message now
+    int motorChannelIndex;
+    double bias;
+    {
+      int intIndex = 0;
+      char intBuf[8] = {'\0'};
+      int floatIndex = 0;
+      char floatBuf[16] = {'\0'};
+      bool indexEndFound = false;
+      bool request = false; // default to command
+      // split out integer index and float bias
+      for(int c=0; c<packet_size; c++)
+      {
+        if (buffer[c] == ',' || buffer[c] == '?'){
+          indexEndFound = true;
+          if (buffer[c] == ',') continue;
+          request = true;
+          break;
+        } else if (indexEndFound){
+          floatBuf[floatIndex] = buffer[c];
+          floatIndex++;
+          continue;
+        } else {
+          intBuf[intIndex] = buffer[c];
+          intIndex++;
+          continue;
+        }
+      }
+      motorChannelIndex = atoi(intBuf);
+      // current bias requested
+      if (request){
+        PIDControllers[motorChannelIndex/4]->get_sensor_bias(motorChannelIndex%4, &bias);
+        // create a packet containing current bias
+        server.beginPacket(server.remoteIP(), server.remotePort());
+        server.printf("%i,%f", motorChannelIndex, bias);
+        server.endPacket();
+      // new bias commanded
+      }else {
+        bias = atof(floatBuf);
+      }
+    }
+
+    // Have the index and bias, now set the PIDController channel
+    return PIDControllers[motorChannelIndex/4]->set_sensor_bias(motorChannelIndex%4, bias);
+  }
+}
+
 UDPMotorStateStreaming::UDPMotorStateStreaming(int port, int _PIDControllerCount, PIDController** _PIDControllers)
 : UDPInterfaceABC(port, _PIDControllerCount, _PIDControllers)
 {}
