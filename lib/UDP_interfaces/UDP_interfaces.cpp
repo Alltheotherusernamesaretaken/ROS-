@@ -30,12 +30,15 @@ int UDPSetpoint::handle(){
       int floatIndex = 0;
       char floatBuf[16] = {'\0'};
       bool indexEndFound = false;
+      bool request = false; // default to command
       // split out integer index and float setpoint
       for(int c=0; c<packet_size; c++)
       {
-        if (buffer[c] == ','){
+        if (buffer[c] == ',' || buffer[c] == '?'){
           indexEndFound = true;
-          continue;
+          if (buffer[c] == ',') continue;
+          request = true;
+          break;
         } else if (indexEndFound){
           floatBuf[floatIndex] = buffer[c];
           floatIndex++;
@@ -47,7 +50,17 @@ int UDPSetpoint::handle(){
         }
       }
       motorChannelIndex = atoi(intBuf);
-      setpoint = atof(floatBuf);
+      // current setpoint requested
+      if (request){
+        PIDControllers[motorChannelIndex/4]->get_PID_setpoint(motorChannelIndex%4, &setpoint);
+        // create a packet containing current setpoint
+        server.beginPacket(server.remoteIP(), server.remotePort());
+        server.printf("%i,%f", motorChannelIndex, setpoint);
+        server.endPacket();
+      // new setpoint commanded
+      }else {
+        setpoint = atof(floatBuf);
+      }
     }
 
     // Have the index and setpoint, now set the PIDController channel
@@ -142,12 +155,16 @@ int UDPTuningGain::handle(){
       char floatBufKd[16] = {'\0'};
       int gainCount = 0;
       bool indexEndFound = false;
+      bool request = false;
 
       for(int c = 0; c<packet_size; c++){
-        if( (buffer[c] == ',')  ){
+        if( (buffer[c] == ',' || buffer[c] == '?')  ){
           if (indexEndFound) {
             gainCount++;
             floatIndex = 0;
+            if (buffer[c] == ',') continue;
+            request = true;
+            break;
           }
           indexEndFound = true;
           continue;
@@ -172,12 +189,17 @@ int UDPTuningGain::handle(){
         }
     }
     motorChannelIndex = atoi(intBuf);
-    kp = atof(floatBufKp);
-    ki = atof(floatBufKi);
-    kd = atof(floatBufKd);
+    if (request){
+      PIDControllers[motorChannelIndex/4]->get_PID_gains(motorChannelIndex%4, &kp, &ki, &kd);
+      server.beginPacket(server.remoteIP(), server.remotePort());
+      server.printf("%i,%f,%f,%f", motorChannelIndex, kp, ki, kd);
+      server.endPacket();
+    } else {
+      kp = atof(floatBufKp);
+      ki = atof(floatBufKi);
+      kd = atof(floatBufKd);
+    }
   }
-
   return PIDControllers[motorChannelIndex/4]->set_PID_gains(motorChannelIndex%4, kp, ki, kd);
-
  }
 }
