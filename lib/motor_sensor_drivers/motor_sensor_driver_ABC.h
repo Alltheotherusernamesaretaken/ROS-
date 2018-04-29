@@ -12,14 +12,13 @@ public:
   virtual int update();
 
   int get_angular_position(int index, double* position){
-    if (index >= numSensors) return 1;
     *position = angle_positions[index];
-    return 0;
+    return (index >= numSensors);
   }
 
   int get_angular_positions(int* sensorCount, double* positions){
     *sensorCount = numSensors;
-    for (int i = 0; i<numSensors; i++)
+    for (int i = 0; i<4; i++)
     {
       positions[i] = angle_positions[i];
     }
@@ -27,13 +26,12 @@ public:
   }
 
   int get_angular_velocity(int index, double* velocity){
-    if (index >= numSensors) return 1;
     *velocity = angle_velocities[index];
-    return 0;
+    return (index >= numSensors);
   }
   int get_angular_velocities(int* sensorCount, double* velocities){
     *sensorCount = numSensors;
-    for (int i = 0; i<numSensors; i++)
+    for (int i = 0; i<4; i++)
     {
       velocities[i] = angle_velocities[i];
     }
