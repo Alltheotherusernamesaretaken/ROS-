@@ -55,6 +55,57 @@ int UDPSetpoint::handle(){
   }
 }
 
+UDPMotorStateStreaming::UDPMotorStateStreaming(int port, int _PIDControllerCount, PIDController** _PIDControllers)
+: UDPInterfaceABC(port, _PIDControllerCount, _PIDControllers)
+{}
+
+int UDPMotorStateStreaming::handle(){
+  int packet_size = server.parsePacket();
+  int read_status;
+  if (packet_size){
+    read_status = server.read(buffer, 128);
+    // return error code if read fails
+    if (read_status) return read_status;
+
+    buffer[packet_size] = '\0';
+
+    // Check for proper request
+    if (buffer[0] == 'M'){
+      server.beginPacket(server.remoteIP(), server.remotePort());
+      for(int pidIdx = 0; pidIdx < PIDControllerCount; pidIdx++){
+        // get number of PID's in PIDController
+        int numPID;
+        PIDControllers[pidIdx]->get_num_PID(&numPID);
+        // iterate through PID channels
+        for(int idx = 0; idx < numPID; idx++){
+          double pos, vel, eff;
+          // get current PWM ("effort")
+          PIDControllers[pidIdx]->get_PID_output(idx, &eff);
+          // get current velocity
+          PIDControllers[pidIdx]->get_sensor_vel(idx, &vel);
+          // get current position
+          PIDControllers[pidIdx]->get_sensor_pos(idx, &pos);
+          server.printf(
+            "%i,%f,%f,%f\n",
+            4*pidIdx+idx,
+            eff,
+            vel,
+            pos
+          );
+        } // Finished a PIDController
+      } // Finished all PIDControllers
+      server.endPacket();
+    } else {
+      // echo as rejection
+      server.beginPacket(server.remoteIP(), server.remotePort());
+      server.printf(buffer);
+      server.endPacket();
+    }
+    server.flush();
+  }
+}
+
+
 
 UDPTuningGain::UDPTuningGain(int port, int _PIDControllerCount, PIDController** _PIDControllers)
 : UDPInterfaceABC(port, _PIDControllerCount, _PIDControllers)
