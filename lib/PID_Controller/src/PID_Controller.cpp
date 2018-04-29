@@ -45,11 +45,9 @@ int PIDController::_update_sensor_values(){
   sensor_driver->update();
   // get positions
   int sensorCount = 0;
-  double positions[4] = {0};
   sensor_driver->get_angular_positions(&sensorCount, positions);
 
   // get velocity
-  double velocities[4] = {0};
   sensor_driver->get_angular_velocities(&sensorCount, velocities);
 
   for (int i = 0; i<numPID; i++)
@@ -179,10 +177,33 @@ int PIDController::zero_PID_sensor(int i, double value){
   return 0;
 }
 
+int PIDController::get_num_PID(int* num){
+  *num = numPID;
+  return 0;
+}
+
 int PIDController::get_PID_output(int i, double* output){
   if (i >= numPID) return 1;
   lock();
   *output = motPWM[i];
+  unlock();
+  return 0;
+}
+
+int PIDController::get_sensor_pos(int i, double* position){
+  *position = 0;
+  if (i >= numPID) return 1;
+  lock();
+  *position = positions[i];
+  unlock();
+  return 0;
+}
+
+int PIDController::get_sensor_vel(int i, double* velocity){
+  *velocity = 0;
+  if (i >= numPID) return 1;
+  lock();
+  *velocity = velocities[i];
   unlock();
   return 0;
 }
