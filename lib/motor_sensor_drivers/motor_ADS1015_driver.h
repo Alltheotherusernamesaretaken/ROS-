@@ -13,6 +13,7 @@ public:
   MotorADS1015Driver(int);
 
   int update();
+  int begin(){}
 
 protected:
   Adafruit_ADS1015 ads;
@@ -26,7 +27,7 @@ public:
   LinearActuatorSensorDriver(int,  double*);
 
   int update();
-
+  int begin(){}
 protected:
   // Arms are ordered
   // RAD, RAB, RDE, ROA

@@ -42,6 +42,7 @@ int MotorSPIEncoderDriver::update(){
     prev_timestamps[i] = new_timestamps[i];
     prev_encoders[i] = new_encoders[i];
   }
+  for(int i=numSensors; i<4; i++) angle_positions[i] = angle_bias[i];
 
   return 0;
 }
@@ -82,7 +83,7 @@ int SPIRollingAverageEncoderDriver::update(){
     double dt = ((double)new_timestamps[i] - prev_timestamps[i])/1000.0;
     // angle bias isn't needed for velocity
     roll_vel[i][rollIdx] = angle_gain[i]*((double) (new_encoders[i] - prev_encoders[i]))/dt;
-    
+
     rollIdx = (rollIdx+1)%rollCount;
     // now, log timestamps as old values and record new encoder postions
     prev_timestamps[i] = new_timestamps[i];
