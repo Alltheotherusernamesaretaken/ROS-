@@ -22,13 +22,23 @@ PIDController::PIDController(uint8_t controlType, uint8_t proportionType, int PW
     ledcAttachPin(motPWMPin[i], motPWMChannel[i]);
 
     // Initialize PID
-    motPID[i] = new PID(motSensorVal+i, motPWM+i, motSetpoint+i, 0, 0, 0, ~((motProportionType & (1<<i))>>i), DIRECT);
+    motPID[i] = new PID(motSensorVal+i, motPWM+i, motSetpoint+i, 1.0, 0, 0, ((motProportionType & (1<<i))>>i), DIRECT);
     motPID[i]->SetOutputLimits(340,682);
+    motPID[i]->SetTunings(1.0, 0.0, 0.0);
     motPID[i]->SetMode(AUTOMATIC);
+    motPID[i]->SetSampleTime(10);
     // zero the setpoint, to be safe
-    motSetpoint[i] = 0;
+    motSetpoint[i] = 511;
   }
   unlock();
+}
+
+int PIDController::set_PID_limits(int idx, double min, double max){
+  if (idx >= numPID) return 1;
+  lock();
+  motPID[idx]->SetOutputLimits(min,max);
+  unlock();
+  return 0;
 }
 
 void inline PIDController::lock()
@@ -53,7 +63,7 @@ int PIDController::_update_sensor_values(){
   for (int i = 0; i<numPID; i++)
   {
     // check i-th channel type (0-velocity, 1-position)
-    if (motControlType & 1>>i) {
+    if (motControlType & 1<<i) {
       // position controlled; get the sensor value
       motSensorVal[i] = positions[motSensorChannel[i]];
     } else {
@@ -89,6 +99,7 @@ int PIDController::set_PID_gains(int i, double kp, double ki, double kd){
 }
 
 int PIDController::get_PID_gains(int i, double *kp, double *ki, double *kd){
+  if (i >= numPID) return 1;
   lock();
   *kp = motPID[i]->GetKp();
   *ki = motPID[i]->GetKi();

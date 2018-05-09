@@ -2,6 +2,7 @@
 #define UDP_INTERFACE_ABC_H_
 #include<Arduino.h>
 #include<WiFiUdp.h>
+#include<WiFi.h>
 
 #include "PID_Controller.h"
 
@@ -25,17 +26,19 @@ public:
   /// \param port The port number to listen too.
   /// \param PIDcontrollerCount The number of PID controllers present.
   /// \param PIDcontrollers An array of the PID controllers.
-  UDPInterfaceABC(int port,int _PIDControllerCount,PIDController** _PIDControllers){
+  UDPInterfaceABC(int _port,int _PIDControllerCount,PIDController** _PIDControllers){
     PIDControllerCount = (_PIDControllerCount >= 4) ? 4 : _PIDControllerCount;
     for (int i=0;i<PIDControllerCount;i++)
     {
       PIDControllers[i] = _PIDControllers[i];
     }
-    server.begin(port);
+    port = _port;
   }
 
+  int begin(){server.begin(port);}
+
   /// \brief Handles incoming/outcoming messages
-  virtual int handle();
+  int handle(){};
 
 protected:
   int port; ///< Stores the port number.

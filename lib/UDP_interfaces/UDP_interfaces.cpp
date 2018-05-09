@@ -5,12 +5,13 @@ UDPSetpoint::UDPSetpoint(int port, int _PIDControllerCount, PIDController** _PID
 {}
 
 int UDPSetpoint::handle(){
+  //if (server.available() == 0) return 0;
   int packet_size = server.parsePacket();
   int read_status;
   if (packet_size){
     read_status = server.read(buffer, 128);
     // return error code if read fails
-    if (read_status) return read_status;
+    //if (read_status) return read_status;
 
     buffer[packet_size] = '\0';
 
@@ -18,7 +19,6 @@ int UDPSetpoint::handle(){
     server.beginPacket(server.remoteIP(), server.remotePort());
     server.printf(buffer);
     server.endPacket();
-
     server.flush();
 
     // Parse the message now
@@ -34,22 +34,34 @@ int UDPSetpoint::handle(){
       // split out integer index and float setpoint
       for(int c=0; c<packet_size; c++)
       {
+        // Index populated
         if (buffer[c] == ',' || buffer[c] == '?'){
           indexEndFound = true;
+          intBuf[intIndex] = '\0';
+          motorChannelIndex = atoi(intBuf);
+          intIndex = 0;
           if (buffer[c] == ',') continue;
           request = true;
           break;
         } else if (indexEndFound){
-          floatBuf[floatIndex] = buffer[c];
-          floatIndex++;
-          continue;
+          if (buffer[c] == '\n') {
+            floatBuf[floatIndex] = '\0';
+            setpoint = atof(floatBuf);
+            floatIndex = 0;
+            PIDControllers[motorChannelIndex/4]->set_PID_setpoint(motorChannelIndex%4, setpoint);
+            indexEndFound = false;
+            continue;
+          } else{
+            floatBuf[floatIndex] = buffer[c];
+            floatIndex++;
+            continue;
+          }
         } else {
           intBuf[intIndex] = buffer[c];
           intIndex++;
           continue;
         }
       }
-      motorChannelIndex = atoi(intBuf);
       // current setpoint requested
       if (request){
         PIDControllers[motorChannelIndex/4]->get_PID_setpoint(motorChannelIndex%4, &setpoint);
@@ -58,9 +70,8 @@ int UDPSetpoint::handle(){
         server.printf("%i,%f", motorChannelIndex, setpoint);
         server.endPacket();
       // new setpoint commanded
-      }else {
-        setpoint = atof(floatBuf);
       }
+      return 0;
     }
 
     // Have the index and setpoint, now set the PIDController channel
@@ -160,7 +171,7 @@ int UDPSensorGain::handle(){
 
     // Parse the message now
     int motorChannelIndex;
-    double bias;
+    double gain;
     {
       int intIndex = 0;
       char intBuf[8] = {'\0'};
@@ -168,7 +179,7 @@ int UDPSensorGain::handle(){
       char floatBuf[16] = {'\0'};
       bool indexEndFound = false;
       bool request = false; // default to command
-      // split out integer index and float bias
+      // split out integer index and float gain
       for(int c=0; c<packet_size; c++)
       {
         if (buffer[c] == ',' || buffer[c] == '?'){
@@ -187,21 +198,21 @@ int UDPSensorGain::handle(){
         }
       }
       motorChannelIndex = atoi(intBuf);
-      // current bias requested
+      // current gain requested
       if (request){
-        PIDControllers[motorChannelIndex/4]->get_sensor_bias(motorChannelIndex%4, &bias);
-        // create a packet containing current bias
+        PIDControllers[motorChannelIndex/4]->get_sensor_gain(motorChannelIndex%4, &gain);
+        // create a packet containing current gain
         server.beginPacket(server.remoteIP(), server.remotePort());
-        server.printf("%i,%f", motorChannelIndex, bias);
+        server.printf("%i,%f", motorChannelIndex, gain);
         server.endPacket();
-      // new bias commanded
+      // new gain commanded
       }else {
-        bias = atof(floatBuf);
+        gain = atof(floatBuf);
       }
     }
 
-    // Have the index and bias, now set the PIDController channel
-    return PIDControllers[motorChannelIndex/4]->set_sensor_bias(motorChannelIndex%4, bias);
+    // Have the index and gain, now set the PIDController channel
+    return PIDControllers[motorChannelIndex/4]->set_sensor_gain(motorChannelIndex%4, gain);
   }
 }
 

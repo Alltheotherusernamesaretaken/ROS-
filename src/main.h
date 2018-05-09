@@ -44,7 +44,6 @@ inline void start_WiFi() {
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  Serial.println("BAM!!");
 }
 
 void inline start_OTA() {
