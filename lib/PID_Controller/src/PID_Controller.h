@@ -109,11 +109,29 @@ public:
   /// \param target Target value to set current position too
   int zero_PID_sensor(int, double target=0.0);
 
+  /// \brief Gets number of active PID channels.
+  ///
+  /// \param num  Number of PID channels.
+  int get_num_PID(int*);
+
   /// \brief Gets the current PWM command.
   ///
   /// \param channel PID channel index.
   /// \param pwmVal Pointer to put PWM value in.
   int get_PID_output(int, double*);
+
+  /// \brief Gets the current sensor position.
+  ///
+  /// \param channel PID channel index.
+  /// \param pwmVal Pointer to put sensor position value in.
+  int get_sensor_pos(int, double*);
+
+  /// \brief Gets the current sensor velocity.
+  ///
+  /// \param channel PID channel index.
+  /// \param pwmVal Pointer to put sensor velocity value in.
+  int get_sensor_vel(int, double*);
+
 
   /// \brief Sets PID output limits
   ///
@@ -132,9 +150,12 @@ private:
 
   PID* motPID[4]; ///< Array of PID objects for each PID channel.
 
+  double positions[4] = {0};  ///< Array of sensor positions
+  double velocities[4] = {0}; ///< Array of sensor velocities
+
   double motSetpoint[4] = {0}; ///< Array of PID setpoints for each PID channel.
-  double motSensorVal[4] = {0}; ///< Array of PID sensor values for each PID channel.
-  double motPWM[4] = {511}; ///< Array of PID PWM outputs for each PID channel.
+  double motSensorVal[4] = {511, 511, 511, 511}; ///< Array of PID sensor values for each PID channel.
+  double motPWM[4] = {511, 511, 511, 511}; ///< Array of PID PWM outputs for each PID channel.
 
   uint8_t motControlType; ///< Bitmask encoding control types for each PID channel.
   uint8_t motProportionType; ///< Bitmask encoding proportion types for each PID channel.

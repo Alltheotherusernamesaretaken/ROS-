@@ -17,6 +17,17 @@ public:
   int handle();
 };
 
+/// \class Stream motor state info to requesting client
+///
+/// This class streams motor sensor data to any client that requests a stream.
+class UDPMotorStateStreaming : public UDPInterfaceABC
+{
+public:
+  UDPMotorStateStreaming(int, int, PIDController**);
+
+  int handle();
+};
+
 /// \class Updates PID sensor biases.
 ///
 /// This class updates the sensor bias used to transform the measured
