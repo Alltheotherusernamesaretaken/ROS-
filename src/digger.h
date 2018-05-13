@@ -29,12 +29,12 @@
   #define SPI_1_1_BIAS 511
   #define SPI_1_2_GAIN 0
   #define SPI_1_2_BIAS 511
-  #define SPI_1_3_GAIN 1/1024/4*2*3.14
-  #define SPI_1_3_BIAS 0
+  #define SPI_1_3_GAIN 0 //1/1024/4*2*3.14
+  #define SPI_1_3_BIAS 511
   #define SPI_1_4_GAIN 0
   #define SPI_1_4_BIAS 511
 // SPI 1 PID
-#define SPI_1_CONTROL_TYPE 0b00001101
+#define SPI_1_CONTROL_TYPE 0b00001111
 #define SPI_1_PROPORTION_TYPE 0b00001111
 #define SPI_1_PWM_OFFSET 0
 #define SPI_1_PWM_CHANNELS 5,17,33,32  //26,25,33,32 // 13,12,14,27
@@ -46,8 +46,8 @@
   #define SPI_1_2_KP 1
   #define SPI_1_2_KI 0
   #define SPI_1_2_KD 0
-  #define SPI_1_3_KP 2.8195
-  #define SPI_1_3_KI 44.2844
+  #define SPI_1_3_KP 1 //2.8195
+  #define SPI_1_3_KI 0 //44.2844
   #define SPI_1_3_KD 0
   #define SPI_1_4_KP 1
   #define SPI_1_4_KI 0
