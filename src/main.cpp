@@ -2,7 +2,8 @@
 
 #include <SPI.h>
 
-#include <digger.h>
+#include <dumper.h>
+//#include <digger.h>
 // testing includes
 //#include "test_adc.h"
 //#include "test_spi.h"
@@ -83,7 +84,7 @@ void loop() {
     if (cnt == 0){
       Serial.print("main_loop: ");
       Serial.println(xPortGetCoreID());
-      for (int i=0; i<3; i++){
+      for (int i=0; i<NUM_PID; i++){
         for (int j=0; j<4; j++){
           double set;
           double pwm;
