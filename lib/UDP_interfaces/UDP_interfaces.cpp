@@ -48,7 +48,7 @@ int UDPSetpoint::handle(){
             floatBuf[floatIndex] = '\0';
             setpoint = atof(floatBuf);
             floatIndex = 0;
-            PIDControllers[motorChannelIndex/4]->set_PID_setpoint(motorChannelIndex%4, setpoint);
+            if (motorChannelIndex < 4*PIDControllerCount) PIDControllers[motorChannelIndex/4]->set_PID_setpoint(motorChannelIndex%4, setpoint);
             indexEndFound = false;
             continue;
           } else{

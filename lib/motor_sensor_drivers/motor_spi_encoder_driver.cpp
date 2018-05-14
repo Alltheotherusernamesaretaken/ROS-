@@ -20,7 +20,7 @@ int MotorSPIEncoderDriver::begin(){
 
 // update encoder information
 int MotorSPIEncoderDriver::update(){
-  int new_encoders[4];
+  int32_t new_encoders[4] = {0,0,0,0};
   unsigned int new_timestamps[4];
   // get new sensor information
   for(int i=0; i<numSensors; i++)
@@ -28,12 +28,11 @@ int MotorSPIEncoderDriver::update(){
     new_timestamps[i] = millis();
     new_encoders[i] = encs[i]->readEncoder();
   }
-
   // update position and velocity information
   for(int i=0; i<numSensors; i++)
   {
     // get new position value
-    angle_positions[i] = new_encoders[i] * angle_gain[i] + angle_bias[i];
+    angle_positions[i] = ((double) new_encoders[i]) * angle_gain[i] + angle_bias[i];
     // get delta time
     double dt = ((double)new_timestamps[i] - prev_timestamps[i])/1000.0;
     // angle bias isn't needed for velocity

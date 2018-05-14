@@ -15,6 +15,8 @@
 #define SCLK 18
 //#define SS 5
 
+#define NUM_PID 3
+
 #define SCL 22
 #define SDA 21
 //#define I2C_PINS 21,22
