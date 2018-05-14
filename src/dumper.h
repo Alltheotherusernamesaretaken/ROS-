@@ -10,10 +10,10 @@
 
 // Configs
 //#define SPI_PINS 14,27,13,15
-//#define MOSI 23
-//#define MISO 19
-//#define SCLK 18
-//#define SS 5
+#define MOSI 23
+#define MISO 19
+#define SCLK 18
+#define SS 5
 
 #define NUM_PID 2
 
@@ -25,7 +25,7 @@
 
 // SPI 1
 #define SPI_1_NUM 0
-#define SPI_1_DRIVE_PINS 15,0,2,4
+#define SPI_1_DRIVE_PINS 0 //15,0,2,4
 // SPI 1 Sensor Gains
   #define SPI_1_1_GAIN 0
   #define SPI_1_1_BIAS 511
@@ -57,7 +57,7 @@
 
 // SPI 2
 #define SPI_2_NUM 2
-#define SPI_2_DRIVE_PINS 4, 16
+#define SPI_2_DRIVE_PINS 4, 16 //15
 // SPI 2 Sensor Gains
   #define SPI_2_1_GAIN (1.0f/1024.0f/4.0f*2.0f*3.14f)
   #define SPI_2_1_BIAS 0
