@@ -231,7 +231,7 @@ int UDPMotorStateStreaming::handle(){
     buffer[packet_size] = '\0';
 
     // Check for proper request
-    if (buffer[0] == 'M'){
+    if (buffer[0] == '?'){
       server.beginPacket(server.remoteIP(), server.remotePort());
       for(int pidIdx = 0; pidIdx < PIDControllerCount; pidIdx++){
         // get number of PID's in PIDController

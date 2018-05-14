@@ -8,6 +8,8 @@
 #include "motor_ADS1015_driver.h"
 #include <Wire.h>
 
+const char* hostname = "digger";
+
 // Configs
 //#define SPI_PINS 14,27,13,15
 #define MOSI 23

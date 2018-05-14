@@ -8,6 +8,17 @@
 #include "motor_ADS1015_driver.h"
 #include <Wire.h>
 
+// Logic Level Shifter Channels
+// 1:
+// 2: SS1 N/C
+// 3: SS2 N/C
+// 4: SS3 16
+// 5: SS4 4
+// 6: MOSI 23
+// 7: MISO 19
+// 8: SCLK 18
+const char* hostname = "dumper";
+
 // Configs
 //#define SPI_PINS 14,27,13,15
 #define MOSI 23
@@ -70,12 +81,12 @@
 #define SPI_2_PWM_CHANNELS 5, 17
 #define SPI_2_SENSOR_CHANNELS 0,1
   // SPI 2 PID Gains
-  #define SPI_2_1_KP 40 //20
-  #define SPI_2_1_KI 40 //12.5
-  #define SPI_2_1_KD 0
-  #define SPI_2_2_KP 20
-  #define SPI_2_2_KI 12.5
-  #define SPI_2_2_KD 0
+  #define SPI_2_1_KP 25 //20
+  #define SPI_2_1_KI 0.1 //12.5
+  #define SPI_2_1_KD 6
+  #define SPI_2_2_KP 25
+  #define SPI_2_2_KI 0.1
+  #define SPI_2_2_KD 6
 
 // Gravity Compensation Values
 #define GRAVITY_GAIN 24.289f
@@ -94,6 +105,7 @@ MotorSPIEncoderDriver SPI_enc_1(numberOfEncoders_1, encoderSelectPinArray_1);
 int numberOfEncoders_2 = SPI_2_NUM;
 int encoderSelectPinArray_2[] = { SPI_2_DRIVE_PINS };
 MotorSPIEncoderDriver SPI_enc_2(numberOfEncoders_2, encoderSelectPinArray_2);
+//SPIRollingAverageEncoderDriver SPI_enc_2(numberOfEncoders_2, encoderSelectPinArray_2, 2);
 #endif
 
 
@@ -118,9 +130,9 @@ PIDController spi_pid_1(
 uint8_t SPIcontrolType_2 = SPI_2_CONTROL_TYPE; // All Velocity
 uint8_t SPIproportionType_2 = SPI_2_PROPORTION_TYPE; // All PoE
 int SPIPWMChannelOffset_2 = SPI_2_PWM_OFFSET; // First PID so no offset
-int SPInumPID_2 = SPI_2_NUM + 1; // 4 PID
-int SPIPWMpins_2[ SPI_2_NUM + 1] = { SPI_2_PWM_CHANNELS }; // The four PWM pins
-int SPIPIDSensorChannels_2[ SPI_2_NUM + 1 ] = { SPI_2_SENSOR_CHANNELS };
+int SPIPIDSensorChannels_2[ SPI_2_NUM] = { SPI_2_SENSOR_CHANNELS };
+int SPIPWMpins_2[ SPI_2_NUM] = { SPI_2_PWM_CHANNELS }; // The four PWM pins
+int SPInumPID_2 = SPI_2_NUM; // 4 PID
 GravityCompPID spi_pid_2(
   SPIcontrolType_2,
   SPIproportionType_2,
@@ -169,7 +181,6 @@ inline void init() {
   // SPI PID 2
   {
     SPI_enc_2.begin();
-    Serial.printf("SPI_2_1_GAIN: %lf", SPI_2_1_GAIN);
     // 1
     spi_pid_2.set_sensor_gain(0,SPI_2_1_GAIN);
     spi_pid_2.set_sensor_bias(0,SPI_2_1_BIAS);

@@ -26,13 +26,15 @@
 // Set ssid and password here
 const char* ssid = "NASA RMC Test Network";
 const char* password = "StateSpaceRobotics";
-const char* hostname = "esp32_OTA";
+extern const char* hostname;
 
 // Inlined to encourage compiler optimization
 inline void start_WiFi() {
   // Start up wifi and connect
+  Serial.printf("Hostname: %s\n", hostname);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  WiFi.setHostname(hostname);
 
   // Restart until successful connect
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
@@ -40,6 +42,7 @@ inline void start_WiFi() {
     delay(5000);
     ESP.restart();
   }
+
   // Print the IP
   Serial.println("Ready");
   Serial.print("IP address: ");
