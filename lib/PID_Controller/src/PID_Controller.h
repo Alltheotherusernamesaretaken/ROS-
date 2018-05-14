@@ -140,7 +140,7 @@ public:
   /// \param upper PID upper output bound.
   int set_PID_limits(int, double, double);
 
-private:
+protected:
 
   SemaphoreHandle_t mutex; ///< Lock for thread-safe accesses
   int numPID; ///< Number of active PID channels
@@ -172,6 +172,33 @@ private:
 
   void lock();
   void unlock();
+};
+
+class GravityCompPID : public PIDController
+{
+public:
+
+  /// \brief Constructer method.
+  ///
+  /// \param controlType Bitmask for motor control type (velocity/position).
+  /// \param proportionType Bitmask for motor proportion type (PoE/PoM).
+  /// \param PWMChannelOffset Sets the offset of the starting PWM channel.
+  /// \param numPID Number of PID channels to create.
+  /// \param PIDPins Array of PWM pins for each channel.
+  /// \param PIDSensorChannels Array of sensor channels for each PID channel.
+  /// \param driver Pointer to MotorSensorDriverABC object to handle sensors
+  /// \param gain
+  /// \param bias
+  ///
+  GravityCompPID(uint8_t, uint8_t, int, int, int*, int*, MotorSensorDriverABC*, double, double);
+
+private:
+
+  double motGain;
+  double motBias;
+
+  /// \brief Writes the PWM values in motPWM to the PWM channels in motPWMChannel.
+  int _write_PWM_values();
 };
 
 #endif

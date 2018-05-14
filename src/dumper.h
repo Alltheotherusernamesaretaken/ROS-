@@ -108,7 +108,7 @@ PIDController spi_pid_1(
   SPInumPID_1,
   SPIPWMpins_1,
   SPIPIDSensorChannels_1,
-  &SPI_enc_1
+  &SPI_enc_1,
 );
 // SPI PID 2 - Accessories
 uint8_t SPIcontrolType_2 = SPI_2_CONTROL_TYPE; // All Velocity
@@ -117,14 +117,16 @@ int SPIPWMChannelOffset_2 = SPI_2_PWM_OFFSET; // First PID so no offset
 int SPInumPID_2 = SPI_2_NUM + 1; // 4 PID
 int SPIPWMpins_2[ SPI_2_NUM + 1] = { SPI_2_PWM_CHANNELS }; // The four PWM pins
 int SPIPIDSensorChannels_2[ SPI_2_NUM + 1 ] = { SPI_2_SENSOR_CHANNELS };
-PIDController spi_pid_2(
+GravityCompPID spi_pid_2(
   SPIcontrolType_2,
   SPIproportionType_2,
   SPIPWMChannelOffset_2,
   SPInumPID_2,
   SPIPWMpins_2,
   SPIPIDSensorChannels_2,
-  &SPI_enc_2
+  &SPI_enc_2,
+  24.289f,    //MathCAD magic
+  -0.65521f
 );
 
 // UDP
