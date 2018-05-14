@@ -82,11 +82,11 @@ const char* hostname = "dumper";
 #define SPI_2_SENSOR_CHANNELS 0,1
   // SPI 2 PID Gains
   #define SPI_2_1_KP 25 //20
-  #define SPI_2_1_KI 0.1 //12.5
-  #define SPI_2_1_KD 6
+  #define SPI_2_1_KI 0.01 //12.5
+  #define SPI_2_1_KD 3
   #define SPI_2_2_KP 25
-  #define SPI_2_2_KI 0.1
-  #define SPI_2_2_KD 6
+  #define SPI_2_2_KI 0.01
+  #define SPI_2_2_KD 3
 
 // Gravity Compensation Values
 #define GRAVITY_GAIN 24.289f
