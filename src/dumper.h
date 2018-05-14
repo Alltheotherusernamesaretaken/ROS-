@@ -77,6 +77,10 @@
   #define SPI_2_2_KI 12.5
   #define SPI_2_2_KD 0
 
+// Gravity Compensation Values
+#define GRAVITY_GAIN 24.289f
+#define GRAVITY_BIAS -0.65521f
+
 
 // SPI objects
 // SPI 1 - Drive
@@ -108,7 +112,7 @@ PIDController spi_pid_1(
   SPInumPID_1,
   SPIPWMpins_1,
   SPIPIDSensorChannels_1,
-  &SPI_enc_1,
+  &SPI_enc_1
 );
 // SPI PID 2 - Accessories
 uint8_t SPIcontrolType_2 = SPI_2_CONTROL_TYPE; // All Velocity
@@ -125,8 +129,8 @@ GravityCompPID spi_pid_2(
   SPIPWMpins_2,
   SPIPIDSensorChannels_2,
   &SPI_enc_2,
-  24.289f,    //MathCAD magic
-  -0.65521f
+  GRAVITY_GAIN,
+  GRAVITY_BIAS
 );
 
 // UDP

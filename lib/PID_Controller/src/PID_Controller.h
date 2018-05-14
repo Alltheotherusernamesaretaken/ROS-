@@ -196,6 +196,7 @@ private:
 
   double motGain;
   double motBias;
+  double arm_lengths[2] = { 0.5f, 0.08f };
 
   /// \brief Writes the PWM values in motPWM to the PWM channels in motPWMChannel.
   int _write_PWM_values();
