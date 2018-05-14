@@ -225,3 +225,16 @@ int PIDController::_write_PWM_values(){
   }
   return 0;
 }
+
+GravityCompPID::GravityCompPID(uint8_t controlType, uint8_t proportionType, int PWMChannelOffset, int _numPID, int* PIDArray, int* _PIDSensorChannels, MotorSensorDriverABC* driver, double gain, double bias) : PIDController(controlType, proportionType, PWMChannelOffset, numPID, PIDArray, _PIDSensorChannels, driver){
+  motGain = gain;
+  motBias = bias;
+}
+
+int GravityCompPID::_write_PWM_values(){
+  for(int i=0; i<numPID; i++){
+    double torque = 5.0f * 9.80665f * cos(positions[i]) * arm_lengths[i]; //mgcos(theta)*r m is mass of loaded minibot
+    ledcWrite(motPWMChannel[i], motPWM[i] + (torque * motGain + motBias));
+  }
+  return 0;
+}

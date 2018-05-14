@@ -77,6 +77,10 @@
   #define SPI_2_2_KI 12.5
   #define SPI_2_2_KD 0
 
+// Gravity Compensation Values
+#define GRAVITY_GAIN 24.289f
+#define GRAVITY_BIAS -0.65521f
+
 
 // SPI objects
 // SPI 1 - Drive
@@ -117,14 +121,16 @@ int SPIPWMChannelOffset_2 = SPI_2_PWM_OFFSET; // First PID so no offset
 int SPInumPID_2 = SPI_2_NUM + 1; // 4 PID
 int SPIPWMpins_2[ SPI_2_NUM + 1] = { SPI_2_PWM_CHANNELS }; // The four PWM pins
 int SPIPIDSensorChannels_2[ SPI_2_NUM + 1 ] = { SPI_2_SENSOR_CHANNELS };
-PIDController spi_pid_2(
+GravityCompPID spi_pid_2(
   SPIcontrolType_2,
   SPIproportionType_2,
   SPIPWMChannelOffset_2,
   SPInumPID_2,
   SPIPWMpins_2,
   SPIPIDSensorChannels_2,
-  &SPI_enc_2
+  &SPI_enc_2,
+  GRAVITY_GAIN,
+  GRAVITY_BIAS
 );
 
 // UDP
