@@ -67,13 +67,18 @@ const char* hostname = "dumper";
   #define SPI_1_4_KD 0
 
 // SPI 2
+// 0: BM
+// 1: TM
 #define SPI_2_NUM 2
 #define SPI_2_DRIVE_PINS 4, 16 //15
 // SPI 2 Sensor Gains
+// starting config:
+// 0: 120
+// 1: 60
   #define SPI_2_1_GAIN (1.0f/1024.0f/4.0f*2.0f*3.14f)
-  #define SPI_2_1_BIAS 0
+  #define SPI_2_1_BIAS (2.0f*3.14f/3.0f) // 120 deg
   #define SPI_2_2_GAIN (1.0f/1024.0f/4.0f*2.0f*3.14f)
-  #define SPI_2_2_BIAS 0
+  #define SPI_2_2_BIAS (-2.0f*3.14f/3.0f) // -120
 // SPI 2 PID
 #define SPI_2_CONTROL_TYPE 0b00001111
 #define SPI_2_PROPORTION_TYPE 0b00001111
@@ -81,12 +86,12 @@ const char* hostname = "dumper";
 #define SPI_2_PWM_CHANNELS 5, 17
 #define SPI_2_SENSOR_CHANNELS 0,1
   // SPI 2 PID Gains
-  #define SPI_2_1_KP 25 //20
-  #define SPI_2_1_KI 0.01 //12.5
-  #define SPI_2_1_KD 3
-  #define SPI_2_2_KP 25
-  #define SPI_2_2_KI 0.01
-  #define SPI_2_2_KD 3
+  #define SPI_2_1_KP 25.0f //20
+  #define SPI_2_1_KI 0.0f //12.5
+  #define SPI_2_1_KD 0.0f
+  #define SPI_2_2_KP 15.0f
+  #define SPI_2_2_KI 0.0f
+  #define SPI_2_2_KD 0.0f
 
 // Gravity Compensation Values
 #define GRAVITY_GAIN 24.289f

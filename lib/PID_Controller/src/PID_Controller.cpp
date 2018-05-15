@@ -226,9 +226,15 @@ int PIDController::_write_PWM_values(){
   return 0;
 }
 
-GravityCompPID::GravityCompPID(uint8_t controlType, uint8_t proportionType, int PWMChannelOffset, int _numPID, int* PIDArray, int* _PIDSensorChannels, MotorSensorDriverABC* driver, double gain, double bias) : PIDController(controlType, proportionType, PWMChannelOffset, numPID, PIDArray, _PIDSensorChannels, driver){
+GravityCompPID::GravityCompPID(uint8_t controlType, uint8_t proportionType, int PWMChannelOffset, int _numPID, int* PIDArray, int* _PIDSensorChannels, MotorSensorDriverABC* driver, double gain, double bias)
+: PIDController::PIDController(controlType, proportionType, PWMChannelOffset, _numPID, PIDArray, _PIDSensorChannels, driver)
+{
+  lock();
   motGain = gain;
   motBias = bias;
+
+  if ( motPID[0] != NULL ) motPID[0]->SetControllerDirection(REVERSE);
+  unlock();
 }
 
 int GravityCompPID::_write_PWM_values(){

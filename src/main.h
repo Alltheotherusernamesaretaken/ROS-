@@ -24,7 +24,7 @@
 
 
 // Set ssid and password here
-const char* ssid = "NASA RMC Test Network";
+const char* ssid = "Team_13";
 const char* password = "StateSpaceRobotics";
 extern const char* hostname;
 
