@@ -1,12 +1,6 @@
 #ifndef MAIN_ESP32_ROBOT_DRIVER_H_
 #define MAIN_ESP32_ROBOT_DRIVER_H_
 
-// custom library includes
-#include "motor_spi_encoder_driver.h"
-#include "motor_ADS1015_driver.h"
-#include "PID_Controller.h"
-#include "UDP_interfaces.h"
-
 #include <Arduino.h>
 // WiFi and OTA libraries
 #include <WiFi.h> // ESP32 WiFi drivers
@@ -14,7 +8,7 @@
 #include <WiFiUdp.h> // ESP32 WiFi UDP
 #include <ArduinoOTA.h> // Arduino OTA updates
 #include <Update.h> // Needed for OTA
-#include <Wire.h>
+
 // Identify which core has the Arduino stuff
 #if CONFIG_FREERTOS_UNICORE
 #define ARDUINO_RUNNING_CORE 0
