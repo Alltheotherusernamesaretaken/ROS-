@@ -22,7 +22,6 @@ public:
     /// \param idx Optional channel index
     int setPos(double setpoint, int idx=0){
         pos_set = setpoint;
-        return 0;
     }
 
     /// \brief Sets the new Velocity setpoint
@@ -31,7 +30,6 @@ public:
     /// \param idx Optional channel index
     int setVel(double setpoint, int idx=0){
         vel_set = setpoint;
-        return 0;
     }
 
     /// \brief Gets Position setpoint
@@ -94,7 +92,7 @@ public:
     int setPosCtrl(bool posctrl, int=0){
         pos_ctrl = posctrl;
     }
-    
+
     /// \brief Gets the control type (Pos/Vel)
     ///
     /// \param pos_ctrl Pointer for control type (True/False) (Pos/Vel)
