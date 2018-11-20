@@ -1,0 +1,17 @@
+// This Validates the Bytes being sent via serial packet to the robot.
+// It said something about requiring this check? I do not know
+
+//Calculates CRC16 of nBytes of data in byte array message
+unsigned int crc16(unsigned char *packet, int nBytes) {
+ for (int byte = 0; byte < nBytes; byte++) {
+    crc = crc ^ ((unsigned int)packet[byte] << 8);
+    for (unsigned char bit = 0; bit < 8; bit++) {
+        if (crc & 0x8000) {
+            crc = (crc << 1) ^ 0x1021;
+      }else {
+          crc = crc << 1;
+          }
+      }
+ }
+ return crc;
+}
