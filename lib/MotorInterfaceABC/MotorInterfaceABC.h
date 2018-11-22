@@ -1,7 +1,7 @@
 #include <Arduino.h>
 class MotorInterfaceABC
 {
-private:
+protected:
     bool pos_ctrl=false;
     double pos_set=0;
     double vel_set=0;
