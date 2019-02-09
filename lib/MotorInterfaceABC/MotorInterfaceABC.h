@@ -10,11 +10,11 @@ protected:
     double vel_upper_limit=-1e7;
     double vel_lower_limit=1e7;
 public:
-    MotorInterfaceABC();
-    ~MotorInterfaceABC();
+    MotorInterfaceABC(){};
+    ~MotorInterfaceABC(){};
 
     /// \brief Updates motor with new setpoints, etc.
-    virtual int update();
+    virtual int update() = 0;
 
     /// \brief Sets the new Position setpoint
     ///
