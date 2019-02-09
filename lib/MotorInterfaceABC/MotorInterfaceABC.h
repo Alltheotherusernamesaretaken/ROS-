@@ -20,7 +20,7 @@ public:
     ///
     /// \param setpoint The new setpoint value
     /// \param idx Optional channel index
-    int setPos(double setpoint, int idx=0){
+    virtual int setPos(double setpoint, int idx=0){
         pos_set = setpoint;
     }
 
@@ -28,7 +28,7 @@ public:
     ///
     /// \param setpoint The new setpoint value
     /// \param idx Optional channel index
-    int setVel(double setpoint, int idx=0){
+    virtual int setVel(double setpoint, int idx=0){
         vel_set = setpoint;
     }
 
@@ -49,7 +49,7 @@ public:
     /// \param lower Lower limit
     /// \param upper Upper limit
     /// \param idx Optional channel index
-    int setPosLimits(double lower=-1e7, double upper=1e7, int idx=0){
+    virtual int setPosLimits(double lower=-1e7, double upper=1e7, int idx=0){
         if (lower>upper) return 1;
         if (lower>-1e7) pos_lower_limit = lower;
         if (upper<1e7) pos_upper_limit = upper;
@@ -60,7 +60,7 @@ public:
     /// \param lower Lower limit
     /// \param upper Upper limit
     /// \param idx Optional channel index
-    int setVelLimits(double lower=-1e7, double upper=1e7, int idx=0){
+    virtual int setVelLimits(double lower=-1e7, double upper=1e7, int idx=0){
         if (lower>upper) return 1;
         if (lower>-1e7) vel_lower_limit = lower;
         if (upper<1e7) vel_upper_limit = upper;
@@ -71,7 +71,7 @@ public:
     /// \param lower Lower limit pointer
     /// \param upper Upper limit pointer
     /// \param idx Optional channel index
-    int getPosLimits( double* lower, double* upper, int idx=0){
+    virtual int getPosLimits( double* lower, double* upper, int idx=0){
         if (lower!=NULL) *lower = pos_lower_limit;
         if (upper!=NULL) *upper = pos_upper_limit;
     }
@@ -81,7 +81,7 @@ public:
     /// \param lower Lower limit pointer
     /// \param upper Upper limit pointer
     /// \param idx Optional channel index
-    int getVelLimits( double* lower, double* upper, int idx=0){
+    virtual int getVelLimits( double* lower, double* upper, int idx=0){
         if (lower!=NULL) *lower = vel_lower_limit;
         if (upper!=NULL) *upper = vel_upper_limit;
     }
@@ -89,14 +89,14 @@ public:
     /// \brief Sets the control type (Pos/Vel)
     ///
     /// \param pos_ctrl Control type (True/False) (Pos/Vel)
-    int setPosCtrl(bool posctrl, int=0){
+    virtual int setPosCtrl(bool posctrl, int=0){
         pos_ctrl = posctrl;
     }
 
     /// \brief Gets the control type (Pos/Vel)
     ///
     /// \param pos_ctrl Pointer for control type (True/False) (Pos/Vel)
-    int getPosCtrl(bool* posctrl, int=0){
+    virtual int getPosCtrl(bool* posctrl, int=0){
         *posctrl = pos_ctrl;
     }
 
