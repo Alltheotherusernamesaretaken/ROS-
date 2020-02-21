@@ -1,6 +1,14 @@
 #ifndef MAIN_ESP32_ROBOT_DRIVER_H_
 #define MAIN_ESP32_ROBOT_DRIVER_H_
 
+/* 
+ * define robot setup functions and assemble robot firmware components
+ * 
+ * 
+ * 
+ */
+
+
 #include <Arduino.h>
 // WiFi and OTA libraries
 #include <WiFi.h> // ESP32 WiFi drivers
@@ -8,6 +16,8 @@
 #include <WiFiUdp.h> // ESP32 WiFi UDP
 #include <ArduinoOTA.h> // Arduino OTA updates
 #include <Update.h> // Needed for OTA
+
+#include "params.h"
 
 // Identify which core has the Arduino stuff
 #if CONFIG_FREERTOS_UNICORE
@@ -17,10 +27,6 @@
 #endif
 
 
-// Set ssid and password here
-const char* ssid = "Team_13";
-const char* password = "StateSpaceRobotics";
-extern const char* hostname;
 
 // Inlined to encourage compiler optimization
 inline void start_WiFi() {
@@ -33,7 +39,6 @@ inline void start_WiFi() {
   // Restart until successful connect
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("Connection Failed! Rebooting...");
-    delay(5000);
     ESP.restart();
   }
 
@@ -92,6 +97,8 @@ void inline start_OTA() {
   ArduinoOTA.begin();
 
 }
+
+// define in main.cpp to be clearer on loops
 void WiFi_loop(void * parameter);
 
 

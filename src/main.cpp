@@ -6,8 +6,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Booting");
 
-  delay(2000);
-
   // Start wifi
   start_WiFi();
   // Start OTA server
