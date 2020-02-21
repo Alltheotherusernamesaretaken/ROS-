@@ -1,23 +1,6 @@
 #include <Arduino.h>
 #include "motor.h"
 #include <PID_v1.h>
-// parameter externs
-// PWM pins
-extern const int FL_PWM;
-extern const int FR_PWM;
-extern const int BL_PWM;
-extern const int BR_PWM;
-// DIR pins
-extern const int L_DIR_1;
-extern const int L_DIR_2;
-extern const int R_DIR_1;
-extern const int R_DIR_2;
-// PWM range
-extern const int PWM_MAX;
-
-// encoder counts per revolution
-extern const int cpr;
-
 
 class Quad_PWM: public Motor
 {
@@ -46,8 +29,8 @@ protected:
             // direction enable pins
             pinMode(dir[i], OUTPUT);
             // interrupt pins
-            pinMode(A[i], INPUT);
-            pinMode(B[i], INPUT);
+            pinMode(encs[i].A, INPUT);
+            pinMode(encs[i].B, INPUT);
             // PWM pins
             ledcSetup(i, 20000, 8);
             ledcAttachPin(pwm[i], i);
@@ -82,9 +65,9 @@ protected:
         start = stop;
         for(int i=0; i<4; i++)
         {
-            portENTER_CRITICAL(&muxes[i]);
-            cnt[i] = counts[i];
-            portEXIT_CRITICAL(&muxes[i]);
+            portENTER_CRITICAL(&encs[i].mux);
+            cnt[i] = encs[i].count;
+            portEXIT_CRITICAL(&encs[i].mux);
         }
         // split into two loops to reduce time of port mux and mutex usage
         xSemaphoreTake(mtx, portMAX_DELAY);
@@ -116,6 +99,7 @@ protected:
         {
             ledcWrite(i, (uint32_t) round(abs(effs[0])));
         }
+        return 0;
     }
 
     // pins
@@ -125,8 +109,6 @@ protected:
     encoder encs[4];
     // PID setpoint, input, output
     double sets[4], vels[4], effs[4];
-    // pwm max
-    int pwm_max;
 
     // PID objects
     PID FL_PID;
@@ -135,8 +117,12 @@ protected:
     PID BR_PID;
     // access pids via this
     PID* PIDs[4];
+    // pwm max
+    int pwm_max;
     // hardware parameters
-    double cpr, wheel_rad, base_width;
+    double cpr;
+    double wheel_rad;
+    double base_width;
     // r/w mutex
     static SemaphoreHandle_t mtx;
 
@@ -154,10 +140,10 @@ public:
         FR_PID(&(vels[0]), &(effs[0]), &(sets[0]), KP, KI, KD, DIRECT),
         BL_PID(&(vels[0]), &(effs[0]), &(sets[0]), KP, KI, KD, DIRECT),
         BR_PID(&(vels[0]), &(effs[0]), &(sets[0]), KP, KI, KD, DIRECT),
+        pwm_max(PWM_MAX),
         cpr(cpr),
         wheel_rad(wheel_rad),
-        base_width(base_width),
-        pwm_max(PWM_MAX)
+        base_width(base_width)
     {
         mtx = xSemaphoreCreateMutex();
         xSemaphoreTake(mtx, portMAX_DELAY);
@@ -220,6 +206,7 @@ public:
             sets[2] = lin;
             sets[3] = lin;
         }
+        return 0;
     }
 
     int get_twist(double *lin, double *ang)
