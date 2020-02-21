@@ -21,6 +21,15 @@ extern const int cpr;
 
 class Quad_PWM: public Motor
 {
+    typedef struct
+    {
+        portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+        uint8_t A;
+        uint8_t B;
+        int32_t count;
+        bool dir;
+    } encoder;
+
 protected:
     void PID_init()
     {
@@ -54,19 +63,9 @@ protected:
         for(int i = 0; i<4; i++)
         {
             // A interrupts
-            arg[0][i][0] = (void*) &(muxes[i]); // mux
-            arg[0][i][1] = (void*) &(A[i]); // A
-            arg[0][i][2] = (void*) &(B[i]); // B
-            arg[0][i][3] = (void*) &(B[i % 2]); // flip
-            arg[0][i][4] = (void*) &(counts[i]); // count
-            attachInterruptArg(A[i], &ISR, (void*) arg[0][i], CHANGE);
+            attachInterruptArg(encs[i].A, &ISR_A, (void*) &(encs[i]), CHANGE);
             // B interrupts
-            arg[1][i][0] = (void*) &(muxes[i]); // mux
-            arg[1][i][1] = (void*) &(A[i]); // A
-            arg[1][i][2] = (void*) &(B[i]); // B
-            arg[1][i][3] = (void*) &(B[1-(i % 2)]); // flip
-            arg[1][i][4] = (void*) &(counts[i]); // count
-            attachInterruptArg(B[i], &ISR, (void*) arg[0][i], CHANGE);
+            attachInterruptArg(encs[i].B, &ISR_B, (void*) &(encs[i]), CHANGE);
         }
     }
 
@@ -95,7 +94,7 @@ protected:
             prev_cnt[i] = cnt[i];
         }
         xSemaphoreGive(mtx);
-        return 0
+        return 0;
     }
 
     int PID_update()
@@ -106,20 +105,24 @@ protected:
             PIDs[i]->Compute();
         }
         xSemaphoreGive(mtx);
+        // left side
+        digitalWrite(dir[0], (effs[0] > 0) ? HIGH : LOW);
+        digitalWrite(dir[1], (effs[0] > 0) ? LOW : HIGH);
+        // right side
+        digitalWrite(dir[2], (effs[2] > 0) ? HIGH : LOW);
+        digitalWrite(dir[3], (effs[2] > 0) ? LOW : HIGH);
         // write PWM
-        for(int i=0; i<4; i++)
+        for (int i=0; i<4; i++)
         {
-            // TODO: 
+            ledcWrite(i, (uint32_t) round(abs(effs[0])));
         }
     }
 
     // pins
     int pwm[4];
     int dir[4];
-    int A[4];
-    int B[4];
-    bool flip[2] = {false, true};
 
+    encoder encs[4];
     // PID setpoint, input, output
     double sets[4], vels[4], effs[4];
     // pwm max
@@ -132,11 +135,10 @@ protected:
     PID BR_PID;
     // access pids via this
     PID* PIDs[4];
-
-    // encoder ISR stuff
-    void* arg[2][4][5]; // ugly, but wasn't sure if they'd stay in scope if local to INT_init
-    int32_t counts[4] = {0};
-    portMUX_TYPE muxes[4] = {portMUX_INITIALIZER_UNLOCKED};
+    // hardware parameters
+    double cpr, wheel_rad, base_width;
+    // r/w mutex
+    static SemaphoreHandle_t mtx;
 
 public:
     Quad_PWM(
@@ -171,49 +173,65 @@ public:
         for(int i=0; i<4; i++){
             pwm[i] = PWM_PINS[i];
             dir[i] = DIR_PINS[i];
-            A[i] = INT_A_PINS[i];
-            B[i] = INT_B_PINS[i];
+            encs[i].A = INT_A_PINS[i];
+            encs[i].B = INT_B_PINS[i];
+            encs[i].count = 0;
+            encs[i].dir = i%2;
         }
         xSemaphoreGive(mtx);
         
     }
     ~Quad_PWM(){}
 
-    typedef struct
-    {
-        typedef struct
-        {
-            portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
-            uint8_t A;
-            uint8_t B;
-            int32_t count;
-            bool flip;
-        } channel;
-        channel A, B;
-
-    } encoder;
-    
-
-    // hardware parameters
-    double cpr, wheel_rad, base_width;
-
-    // r/w mutex
-    static SemaphoreHandle_t mtx;
-
-    void init()
+    int init()
     {
         PIN_init();
         INT_init();
         PID_init();
+        return 0;
     }
 
+    int update()
+    {
+        vel_update();
+        PID_update();
+        return 0;
+    }
 
+    int set_twist(double lin, double ang)
+    {
+        // convert lin/ang to l/r vels
+        if (abs(ang) > 0.01)
+        {
+            double r = abs(lin/ang);
+            double angmag = abs(ang);
+            double sgnlin = lin > 0 ? 1 : -1;
+            double sgnang = ang > 0 ? 1 : -1;
 
+            sets[0] = sgnlin*angmag*(r - sgnlin*sgnang*base_width/2.0);
+            sets[2] = sgnlin*angmag*(r - sgnlin*sgnang*base_width/2.0);
 
+            sets[1] = sgnlin*angmag*(r + sgnlin*sgnang*base_width/2.0);
+            sets[3] = sgnlin*angmag*(r + sgnlin*sgnang*base_width/2.0);
+        } else // easy, just lin vel
+        {
+            sets[0] = lin;
+            sets[1] = lin;
+            sets[2] = lin;
+            sets[3] = lin;
+        }
+    }
+
+    int get_twist(double *lin, double *ang)
+    {
+        *lin = (vels[0]+vels[1]+vels[2]+vels[3]) / 4.0;
+        *ang = (vels[1]+vels[3]-vels[0]-vels[2])/base_width / 2.0;
+        return 0;
+    }
 
     // static method for ISR
     // This is NUTS but oughtta work
-    static void IRAM_ATTR ISR(void*){
+    static void IRAM_ATTR ISR_A(void* arg){
     /* Inputs is void* to a void* array of the following:
      * portMUX_TYPE* - mux for isr blocking
      * int*          - Encoder Pin A
@@ -221,27 +239,48 @@ public:
      * bool*         - Boolean to flip increment direction
      * int32_t*     - count to increment
      */
-    static void** arr;
-    static int enc;
-    arr = static_cast<void**>(arg);
-    portMUX_TYPE* mux = static_cast<portMUX_TYPE*>(arr[0]);
-    portENTER_CRITICAL_ISR(mux);
-
-    enc = digitalRead(*(int*)(arr[1])) ^ digitalRead(*(int*)(arr[2])) ^ (*(bool*)arr[3]);
-    switch (enc)
+    static encoder* enc;
+    static int dir;
+    enc = static_cast<encoder*>(arg);
+    portENTER_CRITICAL_ISR(&(enc->mux));
+    dir = digitalRead(enc->A) ^ digitalRead(enc->B) ^ enc->dir;
+    switch (dir)
     {
     case 1:
-        (*(int32_t*)arr[4])++;
+        enc->count++;
         break;
     
     case 0:
-        (*(int32_t*)arr[4])--;
+        enc->count--;
         break;
     }
-
-    portEXIT_CRITICAL_ISR(mux);
+    portEXIT_CRITICAL_ISR(&(enc->mux));
 }
-
+    static void IRAM_ATTR ISR_B(void* arg){
+    /* Inputs is void* to a void* array of the following:
+     * portMUX_TYPE* - mux for isr blocking
+     * int*          - Encoder Pin A
+     * int*          - Encoder Pin B
+     * bool*         - Boolean to flip increment direction
+     * int32_t*     - count to increment
+     */
+    static encoder* enc;
+    static int dir;
+    enc = static_cast<encoder*>(arg);
+    portENTER_CRITICAL_ISR(&(enc->mux));
+    dir = digitalRead(enc->A) ^ digitalRead(enc->B) ^ enc->dir;
+    switch (dir)
+    {
+    case 1:
+        enc->count--;
+        break;
+    
+    case 0:
+        enc->count++;
+        break;
+    }
+    portEXIT_CRITICAL_ISR(&(enc->mux));
+}
 };
 
 
