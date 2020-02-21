@@ -179,6 +179,21 @@ public:
     }
     ~Quad_PWM(){}
 
+    typedef struct
+    {
+        typedef struct
+        {
+            portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+            uint8_t A;
+            uint8_t B;
+            int32_t count;
+            bool flip;
+        } channel;
+        channel A, B;
+
+    } encoder;
+    
+
     // hardware parameters
     double cpr, wheel_rad, base_width;
 
